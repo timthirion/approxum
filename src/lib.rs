@@ -12,6 +12,7 @@ pub mod sampling;
 pub mod simplify;
 pub mod spatial;
 pub mod tolerance;
+pub mod triangulation;
 
 #[cfg(feature = "simd")]
 pub mod simd;

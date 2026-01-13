@@ -42,3 +42,8 @@ harness = false
 [[bench]]
 name = "curves"
 harness = false
+
+[[bench]]
+name = "simd"
+harness = false
+required-features = ["simd"]

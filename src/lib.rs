@@ -8,6 +8,7 @@ pub mod curves;
 pub mod error;
 pub mod primitives;
 pub mod simplify;
+pub mod spatial;
 pub mod tolerance;
 
 pub use bounds::{minimum_enclosing_circle, Aabb2, BoundingCircle};

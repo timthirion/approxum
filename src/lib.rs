@@ -19,7 +19,7 @@ pub mod simd;
 #[cfg(feature = "exactum")]
 pub mod bridge;
 
-pub use bounds::{minimum_enclosing_circle, Aabb2, BoundingCircle};
+pub use bounds::{minimum_enclosing_circle, Aabb2, BoundingCircle, Obb2};
 pub use error::ApproxError;
 pub use primitives::{Point2, Point3, Segment2, Segment3, Vec2, Vec3};
 pub use sampling::{poisson_disk, poisson_disk_with_seed, PoissonDiskSampler};

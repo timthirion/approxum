@@ -38,6 +38,7 @@ mod core;
 mod decompose;
 mod minkowski;
 mod offset;
+mod skeleton;
 mod triangulate;
 
 pub use boolean::{polygon_difference, polygon_intersection, polygon_union, polygon_xor};
@@ -49,6 +50,7 @@ pub use decompose::{
 };
 pub use minkowski::{minkowski_difference, minkowski_sum, minkowski_sum_convex, polygons_collide};
 pub use offset::{offset_polygon, offset_polygon_simple, JoinStyle};
+pub use skeleton::{medial_axis, straight_skeleton, Skeleton, SkeletonEdge, SkeletonNode};
 pub use triangulate::{
     triangulate_polygon, triangulate_polygon_indexed, triangulation_area, PolygonTriangle,
     TriangulationResult,

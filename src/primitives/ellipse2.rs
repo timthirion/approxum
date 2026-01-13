@@ -1,6 +1,6 @@
 //! 2D ellipse type.
 
-use super::{Point2, Vec2};
+use super::{Circle2, Line2, Point2, Ray2, Segment2, Vec2};
 use num_traits::Float;
 
 /// A 2D ellipse defined by center, semi-axes, and rotation.
@@ -334,6 +334,319 @@ impl<F: Float> Ellipse2<F> {
             Point2::new(self.center.x + c * dir.x, self.center.y + c * dir.y),
         )
     }
+
+    // ==================== Intersection Methods ====================
+
+    /// Transforms a direction vector to local coordinates.
+    fn dir_to_local(&self, dir: Vec2<F>) -> Vec2<F> {
+        let cos_r = self.rotation.cos();
+        let sin_r = self.rotation.sin();
+        Vec2::new(dir.x * cos_r + dir.y * sin_r, -dir.x * sin_r + dir.y * cos_r)
+    }
+
+    /// Intersects this ellipse with an infinite line.
+    ///
+    /// Returns 0, 1, or 2 intersection points with their line parameters.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use approxum::primitives::{Ellipse2, Line2, Point2, Vec2};
+    ///
+    /// let ellipse: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+    /// let line = Line2::horizontal(0.0);
+    ///
+    /// let hits = ellipse.intersect_line(&line);
+    /// assert_eq!(hits.len(), 2);
+    /// ```
+    pub fn intersect_line(&self, line: &Line2<F>) -> Vec<(Point2<F>, F)> {
+        // Transform line to ellipse's local coordinate system
+        let local_origin = self.to_local(line.origin);
+        let local_dir = self.dir_to_local(line.direction);
+
+        // Solve intersection with axis-aligned ellipse: (x/a)² + (y/b)² = 1
+        // Line: P = origin + t * dir
+        // Substitute: ((ox + t*dx)/a)² + ((oy + t*dy)/b)² = 1
+        let a = self.semi_major;
+        let b = self.semi_minor;
+
+        let ox = local_origin.x;
+        let oy = local_origin.y;
+        let dx = local_dir.x;
+        let dy = local_dir.y;
+
+        // Expand to: At² + Bt + C = 0
+        let coef_a = (dx * dx) / (a * a) + (dy * dy) / (b * b);
+        let coef_b = F::from(2.0).unwrap() * ((ox * dx) / (a * a) + (oy * dy) / (b * b));
+        let coef_c = (ox * ox) / (a * a) + (oy * oy) / (b * b) - F::one();
+
+        self.solve_quadratic_intersection(coef_a, coef_b, coef_c, &local_dir, &local_origin)
+    }
+
+    /// Intersects this ellipse with a ray.
+    ///
+    /// Returns intersection points that are on the ray (t >= 0),
+    /// sorted by distance from ray origin.
+    pub fn intersect_ray(&self, ray: &Ray2<F>) -> Vec<(Point2<F>, F)> {
+        let local_origin = self.to_local(ray.origin);
+        let local_dir = self.dir_to_local(ray.direction);
+
+        let a = self.semi_major;
+        let b = self.semi_minor;
+
+        let ox = local_origin.x;
+        let oy = local_origin.y;
+        let dx = local_dir.x;
+        let dy = local_dir.y;
+
+        let coef_a = (dx * dx) / (a * a) + (dy * dy) / (b * b);
+        let coef_b = F::from(2.0).unwrap() * ((ox * dx) / (a * a) + (oy * dy) / (b * b));
+        let coef_c = (ox * ox) / (a * a) + (oy * oy) / (b * b) - F::one();
+
+        // Get all intersections then filter for t >= 0
+        let all_hits = self.solve_quadratic_intersection(coef_a, coef_b, coef_c, &local_dir, &local_origin);
+        all_hits.into_iter().filter(|(_, t)| *t >= F::zero()).collect()
+    }
+
+    /// Intersects this ellipse with a line segment.
+    ///
+    /// Returns intersection points that lie on the segment (t in [0, 1]).
+    pub fn intersect_segment(&self, segment: &Segment2<F>) -> Vec<(Point2<F>, F)> {
+        let local_start = self.to_local(segment.start);
+        let local_dir = self.dir_to_local(segment.direction());
+
+        let a = self.semi_major;
+        let b = self.semi_minor;
+
+        let ox = local_start.x;
+        let oy = local_start.y;
+        let dx = local_dir.x;
+        let dy = local_dir.y;
+
+        let coef_a = (dx * dx) / (a * a) + (dy * dy) / (b * b);
+        let coef_b = F::from(2.0).unwrap() * ((ox * dx) / (a * a) + (oy * dy) / (b * b));
+        let coef_c = (ox * ox) / (a * a) + (oy * oy) / (b * b) - F::one();
+
+        let all_hits = self.solve_quadratic_intersection(coef_a, coef_b, coef_c, &local_dir, &local_start);
+        all_hits
+            .into_iter()
+            .filter(|(_, t)| *t >= F::zero() && *t <= F::one())
+            .collect()
+    }
+
+    /// Intersects this ellipse with a circle.
+    ///
+    /// Returns 0, 1, 2, 3, or 4 intersection points.
+    /// Uses numerical iteration for the general case.
+    pub fn intersect_circle(&self, circle: &Circle2<F>) -> Vec<Point2<F>> {
+        // Special case: if this is actually a circle
+        if self.is_circle() {
+            let my_circle = Circle2::new(self.center, self.semi_major);
+            return my_circle
+                .intersect_circle(circle)
+                .unwrap_or_default();
+        }
+
+        // General case: sample the ellipse and find intersections numerically
+        self.intersect_implicit(|p| {
+            let dx = p.x - circle.center.x;
+            let dy = p.y - circle.center.y;
+            dx * dx + dy * dy - circle.radius * circle.radius
+        })
+    }
+
+    /// Intersects this ellipse with another ellipse.
+    ///
+    /// Returns 0, 1, 2, 3, or 4 intersection points.
+    /// Uses numerical methods for the general case.
+    pub fn intersect_ellipse(&self, other: &Ellipse2<F>) -> Vec<Point2<F>> {
+        // Use the implicit equation of the other ellipse
+        self.intersect_implicit(|p| {
+            let local = other.to_local(p);
+            let nx = local.x / other.semi_major;
+            let ny = local.y / other.semi_minor;
+            nx * nx + ny * ny - F::one()
+        })
+    }
+
+    /// Helper: solves quadratic and returns intersection points.
+    fn solve_quadratic_intersection(
+        &self,
+        a: F,
+        b: F,
+        c: F,
+        local_dir: &Vec2<F>,
+        local_origin: &Point2<F>,
+    ) -> Vec<(Point2<F>, F)> {
+        if a.abs() < F::epsilon() {
+            // Linear case (degenerate)
+            if b.abs() < F::epsilon() {
+                return Vec::new();
+            }
+            let t = -c / b;
+            let local_point = Point2::new(
+                local_origin.x + t * local_dir.x,
+                local_origin.y + t * local_dir.y,
+            );
+            return vec![(self.from_local(local_point), t)];
+        }
+
+        let discriminant = b * b - F::from(4.0).unwrap() * a * c;
+
+        if discriminant < F::zero() {
+            return Vec::new();
+        }
+
+        let sqrt_disc = discriminant.sqrt();
+        let two_a = F::from(2.0).unwrap() * a;
+
+        let t1 = (-b - sqrt_disc) / two_a;
+        let t2 = (-b + sqrt_disc) / two_a;
+
+        let mut results = Vec::new();
+
+        let local_p1 = Point2::new(
+            local_origin.x + t1 * local_dir.x,
+            local_origin.y + t1 * local_dir.y,
+        );
+        results.push((self.from_local(local_p1), t1));
+
+        if discriminant > F::epsilon() {
+            let local_p2 = Point2::new(
+                local_origin.x + t2 * local_dir.x,
+                local_origin.y + t2 * local_dir.y,
+            );
+            results.push((self.from_local(local_p2), t2));
+        }
+
+        // Sort by t
+        results.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+        results
+    }
+
+    /// Helper: finds intersections with an implicit curve f(x,y) = 0.
+    ///
+    /// Samples around the ellipse and finds sign changes.
+    fn intersect_implicit<G>(&self, f: G) -> Vec<Point2<F>>
+    where
+        G: Fn(Point2<F>) -> F,
+    {
+        let num_samples = 64;
+        let tau = F::from(std::f64::consts::TAU).unwrap();
+        let mut results = Vec::new();
+        let tolerance = F::from(1e-8).unwrap();
+
+        // Sample around the ellipse looking for sign changes
+        let mut prev_t = F::zero();
+        let mut prev_val = f(self.point_at(prev_t));
+
+        for i in 1..=num_samples {
+            let t = tau * F::from(i).unwrap() / F::from(num_samples).unwrap();
+            let point = self.point_at(t);
+            let val = f(point);
+
+            // Sign change indicates intersection
+            if prev_val * val < F::zero() {
+                // Binary search to refine
+                if let Some(intersection) = self.bisect_intersection(&f, prev_t, t, tolerance) {
+                    // Avoid duplicates
+                    let is_duplicate = results.iter().any(|p: &Point2<F>| p.distance(intersection) < tolerance);
+                    if !is_duplicate {
+                        results.push(intersection);
+                    }
+                }
+            } else if val.abs() < tolerance {
+                // Point is on the curve
+                let is_duplicate = results.iter().any(|p: &Point2<F>| p.distance(point) < tolerance);
+                if !is_duplicate {
+                    results.push(point);
+                }
+            }
+
+            prev_t = t;
+            prev_val = val;
+        }
+
+        results
+    }
+
+    /// Binary search to find exact intersection point.
+    fn bisect_intersection<G>(&self, f: &G, mut t_low: F, mut t_high: F, tolerance: F) -> Option<Point2<F>>
+    where
+        G: Fn(Point2<F>) -> F,
+    {
+        let max_iterations = 50;
+
+        for _ in 0..max_iterations {
+            let t_mid = (t_low + t_high) / (F::one() + F::one());
+            let p_mid = self.point_at(t_mid);
+            let val_mid = f(p_mid);
+
+            if val_mid.abs() < tolerance {
+                return Some(p_mid);
+            }
+
+            let val_low = f(self.point_at(t_low));
+            if val_low * val_mid < F::zero() {
+                t_high = t_mid;
+            } else {
+                t_low = t_mid;
+            }
+
+            if (t_high - t_low).abs() < tolerance {
+                return Some(p_mid);
+            }
+        }
+
+        Some(self.point_at((t_low + t_high) / (F::one() + F::one())))
+    }
+
+    /// Checks if this ellipse intersects a line.
+    #[inline]
+    pub fn intersects_line(&self, line: &Line2<F>) -> bool {
+        !self.intersect_line(line).is_empty()
+    }
+
+    /// Checks if this ellipse intersects a ray.
+    #[inline]
+    pub fn intersects_ray(&self, ray: &Ray2<F>) -> bool {
+        !self.intersect_ray(ray).is_empty()
+    }
+
+    /// Checks if this ellipse intersects a segment.
+    #[inline]
+    pub fn intersects_segment(&self, segment: &Segment2<F>) -> bool {
+        !self.intersect_segment(segment).is_empty()
+    }
+
+    /// Checks if this ellipse intersects a circle.
+    #[inline]
+    pub fn intersects_circle(&self, circle: &Circle2<F>) -> bool {
+        // Quick bounding box check first
+        let (e_min, e_max) = self.bounding_box();
+        let c_min = Point2::new(circle.center.x - circle.radius, circle.center.y - circle.radius);
+        let c_max = Point2::new(circle.center.x + circle.radius, circle.center.y + circle.radius);
+
+        if e_max.x < c_min.x || e_min.x > c_max.x || e_max.y < c_min.y || e_min.y > c_max.y {
+            return false;
+        }
+
+        !self.intersect_circle(circle).is_empty()
+    }
+
+    /// Checks if this ellipse intersects another ellipse.
+    #[inline]
+    pub fn intersects_ellipse(&self, other: &Ellipse2<F>) -> bool {
+        // Quick bounding box check
+        let (a_min, a_max) = self.bounding_box();
+        let (b_min, b_max) = other.bounding_box();
+
+        if a_max.x < b_min.x || a_min.x > b_max.x || a_max.y < b_min.y || a_min.y > b_max.y {
+            return false;
+        }
+
+        !self.intersect_ellipse(other).is_empty()
+    }
 }
 
 impl<F: Float> Default for Ellipse2<F> {
@@ -562,5 +875,251 @@ mod tests {
         assert_relative_eq!(major.y, 0.0, epsilon = 1e-10);
         assert_relative_eq!(minor.x, 0.0, epsilon = 1e-10);
         assert_relative_eq!(minor.y, 1.0, epsilon = 1e-10);
+    }
+
+    // ==================== Intersection Tests ====================
+
+    #[test]
+    fn test_intersect_line_horizontal() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+        let line = Line2::horizontal(0.0);
+
+        let hits = e.intersect_line(&line);
+        assert_eq!(hits.len(), 2);
+
+        // Should intersect at (-2, 0) and (2, 0)
+        assert_relative_eq!(hits[0].0.x, -2.0, epsilon = 1e-10);
+        assert_relative_eq!(hits[0].0.y, 0.0, epsilon = 1e-10);
+        assert_relative_eq!(hits[1].0.x, 2.0, epsilon = 1e-10);
+        assert_relative_eq!(hits[1].0.y, 0.0, epsilon = 1e-10);
+    }
+
+    #[test]
+    fn test_intersect_line_vertical() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+        let line = Line2::vertical(0.0);
+
+        let hits = e.intersect_line(&line);
+        assert_eq!(hits.len(), 2);
+
+        // Should intersect at (0, -1) and (0, 1)
+        assert_relative_eq!(hits[0].0.x, 0.0, epsilon = 1e-10);
+        assert_relative_eq!(hits[0].0.y, -1.0, epsilon = 1e-10);
+        assert_relative_eq!(hits[1].0.x, 0.0, epsilon = 1e-10);
+        assert_relative_eq!(hits[1].0.y, 1.0, epsilon = 1e-10);
+    }
+
+    #[test]
+    fn test_intersect_line_tangent() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+        let line = Line2::horizontal(1.0); // Tangent at top
+
+        let hits = e.intersect_line(&line);
+        assert_eq!(hits.len(), 1);
+        assert_relative_eq!(hits[0].0.x, 0.0, epsilon = 1e-10);
+        assert_relative_eq!(hits[0].0.y, 1.0, epsilon = 1e-10);
+    }
+
+    #[test]
+    fn test_intersect_line_miss() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+        let line = Line2::horizontal(5.0);
+
+        let hits = e.intersect_line(&line);
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn test_intersect_line_rotated_ellipse() {
+        // Ellipse rotated 90 degrees
+        let e: Ellipse2<f64> = Ellipse2::new(
+            Point2::origin(),
+            2.0,
+            1.0,
+            std::f64::consts::FRAC_PI_2,
+        );
+        let line = Line2::horizontal(0.0);
+
+        let hits = e.intersect_line(&line);
+        assert_eq!(hits.len(), 2);
+
+        // After rotation, major axis is along y, so horizontal line through center
+        // should intersect at (-1, 0) and (1, 0)
+        assert_relative_eq!(hits[0].0.x, -1.0, epsilon = 1e-10);
+        assert_relative_eq!(hits[1].0.x, 1.0, epsilon = 1e-10);
+    }
+
+    #[test]
+    fn test_intersect_ray_through_center() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+        let ray = Ray2::new(Point2::new(-5.0, 0.0), Vec2::new(1.0, 0.0));
+
+        let hits = e.intersect_ray(&ray);
+        assert_eq!(hits.len(), 2);
+
+        assert_relative_eq!(hits[0].0.x, -2.0, epsilon = 1e-10);
+        assert_relative_eq!(hits[1].0.x, 2.0, epsilon = 1e-10);
+    }
+
+    #[test]
+    fn test_intersect_ray_from_inside() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+        let ray = Ray2::new(Point2::origin(), Vec2::new(1.0, 0.0));
+
+        let hits = e.intersect_ray(&ray);
+        assert_eq!(hits.len(), 1); // Only exit point
+
+        assert_relative_eq!(hits[0].0.x, 2.0, epsilon = 1e-10);
+    }
+
+    #[test]
+    fn test_intersect_ray_miss() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+        let ray = Ray2::new(Point2::new(5.0, 5.0), Vec2::new(1.0, 0.0));
+
+        let hits = e.intersect_ray(&ray);
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn test_intersect_segment_through() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+        let seg = Segment2::new(Point2::new(-5.0, 0.0), Point2::new(5.0, 0.0));
+
+        let hits = e.intersect_segment(&seg);
+        assert_eq!(hits.len(), 2);
+
+        assert_relative_eq!(hits[0].0.x, -2.0, epsilon = 1e-10);
+        assert_relative_eq!(hits[1].0.x, 2.0, epsilon = 1e-10);
+    }
+
+    #[test]
+    fn test_intersect_segment_partial() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+        let seg = Segment2::new(Point2::new(0.0, 0.0), Point2::new(5.0, 0.0));
+
+        let hits = e.intersect_segment(&seg);
+        assert_eq!(hits.len(), 1);
+
+        assert_relative_eq!(hits[0].0.x, 2.0, epsilon = 1e-10);
+    }
+
+    #[test]
+    fn test_intersect_segment_miss() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+        let seg = Segment2::new(Point2::new(3.0, 0.0), Point2::new(5.0, 0.0));
+
+        let hits = e.intersect_segment(&seg);
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn test_intersect_circle_two_points() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+        let circle = Circle2::new(Point2::new(1.5, 0.0), 1.0);
+
+        let hits = e.intersect_circle(&circle);
+        assert_eq!(hits.len(), 2);
+
+        // Both points should be on both curves
+        for p in &hits {
+            // Check on ellipse
+            let local = e.to_local(*p);
+            let val = (local.x / 2.0).powi(2) + local.y.powi(2);
+            assert_relative_eq!(val, 1.0, epsilon = 1e-6);
+
+            // Check on circle
+            let dist = p.distance(circle.center);
+            assert_relative_eq!(dist, circle.radius, epsilon = 1e-6);
+        }
+    }
+
+    #[test]
+    fn test_intersect_circle_no_intersection() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+        let circle = Circle2::new(Point2::new(10.0, 0.0), 1.0);
+
+        let hits = e.intersect_circle(&circle);
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn test_intersect_ellipse_two_ellipses() {
+        let e1: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+        let e2: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::new(1.0, 0.0), 2.0, 1.0);
+
+        let hits = e1.intersect_ellipse(&e2);
+        assert!(hits.len() >= 2); // Should have at least 2 intersections
+
+        // All points should be on both ellipses
+        for p in &hits {
+            assert!(e1.contains(*p) || e1.signed_distance(*p).abs() < 1e-5);
+            assert!(e2.contains(*p) || e2.signed_distance(*p).abs() < 1e-5);
+        }
+    }
+
+    #[test]
+    fn test_intersect_ellipse_no_intersection() {
+        let e1: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 1.0, 0.5);
+        let e2: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::new(10.0, 0.0), 1.0, 0.5);
+
+        let hits = e1.intersect_ellipse(&e2);
+        assert!(hits.is_empty());
+    }
+
+    #[test]
+    fn test_intersects_line() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+
+        assert!(e.intersects_line(&Line2::horizontal(0.0)));
+        assert!(!e.intersects_line(&Line2::horizontal(5.0)));
+    }
+
+    #[test]
+    fn test_intersects_ray() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+
+        let ray_hit = Ray2::new(Point2::new(-5.0, 0.0), Vec2::new(1.0, 0.0));
+        let ray_miss = Ray2::new(Point2::new(-5.0, 5.0), Vec2::new(1.0, 0.0));
+
+        assert!(e.intersects_ray(&ray_hit));
+        assert!(!e.intersects_ray(&ray_miss));
+    }
+
+    #[test]
+    fn test_intersects_segment() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+
+        let seg_hit = Segment2::new(Point2::new(-5.0, 0.0), Point2::new(5.0, 0.0));
+        let seg_miss = Segment2::new(Point2::new(3.0, 0.0), Point2::new(5.0, 0.0));
+
+        assert!(e.intersects_segment(&seg_hit));
+        assert!(!e.intersects_segment(&seg_miss));
+    }
+
+    #[test]
+    fn test_intersects_circle() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+
+        let circle_hit = Circle2::new(Point2::new(1.5, 0.0), 1.0);
+        let circle_miss = Circle2::new(Point2::new(10.0, 0.0), 1.0);
+
+        assert!(e.intersects_circle(&circle_hit));
+        assert!(!e.intersects_circle(&circle_miss));
+    }
+
+    #[test]
+    fn test_diagonal_line_intersection() {
+        let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
+        let line = Line2::from_points(Point2::new(-3.0, -3.0), Point2::new(3.0, 3.0));
+
+        let hits = e.intersect_line(&line);
+        assert_eq!(hits.len(), 2);
+
+        // Verify both points are on the ellipse
+        for (p, _) in &hits {
+            let val = (p.x / 2.0).powi(2) + p.y.powi(2);
+            assert_relative_eq!(val, 1.0, epsilon = 1e-10);
+        }
     }
 }

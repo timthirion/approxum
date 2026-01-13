@@ -25,3 +25,20 @@ optional = true
 
 [dev-dependencies]
 approx = "0.5"
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "simplify"
+harness = false
+
+[[bench]]
+name = "spatial"
+harness = false
+
+[[bench]]
+name = "sampling"
+harness = false
+
+[[bench]]
+name = "curves"
+harness = false

@@ -3,9 +3,14 @@
 //! All functions in this module take explicit tolerance parameters.
 //! No hidden epsilons are used.
 
+mod frechet;
 mod hausdorff;
 mod predicates;
 
+pub use frechet::{
+    discrete_frechet_distance, discrete_frechet_distance_linear_space, frechet_distance_approx,
+    frechet_distance_at_most, frechet_distance_binary_search,
+};
 pub use hausdorff::{
     directed_hausdorff, directed_hausdorff_polyline, hausdorff_distance,
     hausdorff_distance_polyline, hausdorff_distance_polyline_exact,

@@ -1,0 +1,209 @@
+//! 2D point type.
+
+use super::Vec2;
+use num_traits::Float;
+use std::ops::{Add, Sub};
+
+/// A 2D point with x and y coordinates.
+///
+/// Generic over floating-point types (`f32` or `f64`).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Point2<F> {
+    pub x: F,
+    pub y: F,
+}
+
+impl<F: Float> Point2<F> {
+    /// Creates a new point.
+    #[inline]
+    pub fn new(x: F, y: F) -> Self {
+        Self { x, y }
+    }
+
+    /// Creates a point at the origin (0, 0).
+    #[inline]
+    pub fn origin() -> Self {
+        Self {
+            x: F::zero(),
+            y: F::zero(),
+        }
+    }
+
+    /// Computes the squared distance to another point.
+    #[inline]
+    pub fn distance_squared(self, other: Self) -> F {
+        let dx = other.x - self.x;
+        let dy = other.y - self.y;
+        dx * dx + dy * dy
+    }
+
+    /// Computes the Euclidean distance to another point.
+    #[inline]
+    pub fn distance(self, other: Self) -> F {
+        self.distance_squared(other).sqrt()
+    }
+
+    /// Linearly interpolates between `self` and `other`.
+    ///
+    /// When `t = 0`, returns `self`. When `t = 1`, returns `other`.
+    #[inline]
+    pub fn lerp(self, other: Self, t: F) -> Self {
+        Self {
+            x: self.x + (other.x - self.x) * t,
+            y: self.y + (other.y - self.y) * t,
+        }
+    }
+
+    /// Returns the midpoint between `self` and `other`.
+    #[inline]
+    pub fn midpoint(self, other: Self) -> Self {
+        let two = F::one() + F::one();
+        Self {
+            x: (self.x + other.x) / two,
+            y: (self.y + other.y) / two,
+        }
+    }
+
+    /// Converts this point to a vector from the origin.
+    #[inline]
+    pub fn to_vec(self) -> Vec2<F> {
+        Vec2::new(self.x, self.y)
+    }
+}
+
+// Point - Point = Vec2
+impl<F: Float> Sub for Point2<F> {
+    type Output = Vec2<F>;
+
+    #[inline]
+    fn sub(self, other: Self) -> Vec2<F> {
+        Vec2::new(self.x - other.x, self.y - other.y)
+    }
+}
+
+// Point + Vec2 = Point
+impl<F: Float> Add<Vec2<F>> for Point2<F> {
+    type Output = Self;
+
+    #[inline]
+    fn add(self, v: Vec2<F>) -> Self {
+        Self {
+            x: self.x + v.x,
+            y: self.y + v.y,
+        }
+    }
+}
+
+// Point - Vec2 = Point
+impl<F: Float> Sub<Vec2<F>> for Point2<F> {
+    type Output = Self;
+
+    #[inline]
+    fn sub(self, v: Vec2<F>) -> Self {
+        Self {
+            x: self.x - v.x,
+            y: self.y - v.y,
+        }
+    }
+}
+
+impl<F: Float> Default for Point2<F> {
+    fn default() -> Self {
+        Self::origin()
+    }
+}
+
+impl<F: Float> From<Vec2<F>> for Point2<F> {
+    fn from(v: Vec2<F>) -> Self {
+        Self { x: v.x, y: v.y }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new() {
+        let p: Point2<f64> = Point2::new(1.0, 2.0);
+        assert_eq!(p.x, 1.0);
+        assert_eq!(p.y, 2.0);
+    }
+
+    #[test]
+    fn test_origin() {
+        let p: Point2<f64> = Point2::origin();
+        assert_eq!(p.x, 0.0);
+        assert_eq!(p.y, 0.0);
+    }
+
+    #[test]
+    fn test_distance() {
+        let a: Point2<f64> = Point2::new(0.0, 0.0);
+        let b = Point2::new(3.0, 4.0);
+        assert_eq!(a.distance_squared(b), 25.0);
+        assert_eq!(a.distance(b), 5.0);
+    }
+
+    #[test]
+    fn test_lerp() {
+        let a: Point2<f64> = Point2::new(0.0, 0.0);
+        let b = Point2::new(10.0, 20.0);
+
+        let start = a.lerp(b, 0.0);
+        assert_eq!(start.x, 0.0);
+        assert_eq!(start.y, 0.0);
+
+        let end = a.lerp(b, 1.0);
+        assert_eq!(end.x, 10.0);
+        assert_eq!(end.y, 20.0);
+
+        let mid = a.lerp(b, 0.5);
+        assert_eq!(mid.x, 5.0);
+        assert_eq!(mid.y, 10.0);
+    }
+
+    #[test]
+    fn test_midpoint() {
+        let a: Point2<f64> = Point2::new(0.0, 0.0);
+        let b = Point2::new(10.0, 20.0);
+        let m = a.midpoint(b);
+        assert_eq!(m.x, 5.0);
+        assert_eq!(m.y, 10.0);
+    }
+
+    #[test]
+    fn test_point_sub_point() {
+        let a: Point2<f64> = Point2::new(1.0, 2.0);
+        let b = Point2::new(4.0, 6.0);
+        let v: Vec2<f64> = b - a;
+        assert_eq!(v.x, 3.0);
+        assert_eq!(v.y, 4.0);
+    }
+
+    #[test]
+    fn test_point_add_vec() {
+        let p: Point2<f64> = Point2::new(1.0, 2.0);
+        let v = Vec2::new(3.0, 4.0);
+        let result = p + v;
+        assert_eq!(result.x, 4.0);
+        assert_eq!(result.y, 6.0);
+    }
+
+    #[test]
+    fn test_point_sub_vec() {
+        let p: Point2<f64> = Point2::new(4.0, 6.0);
+        let v = Vec2::new(3.0, 4.0);
+        let result = p - v;
+        assert_eq!(result.x, 1.0);
+        assert_eq!(result.y, 2.0);
+    }
+
+    #[test]
+    fn test_to_vec() {
+        let p: Point2<f64> = Point2::new(3.0, 4.0);
+        let v = p.to_vec();
+        assert_eq!(v.x, 3.0);
+        assert_eq!(v.y, 4.0);
+    }
+}

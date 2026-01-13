@@ -16,6 +16,9 @@ pub mod tolerance;
 #[cfg(feature = "simd")]
 pub mod simd;
 
+#[cfg(feature = "exactum")]
+pub mod bridge;
+
 pub use bounds::{minimum_enclosing_circle, Aabb2, BoundingCircle};
 pub use error::ApproxError;
 pub use primitives::{Point2, Point3, Segment2, Segment3, Vec2, Vec3};

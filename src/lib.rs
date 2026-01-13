@@ -4,6 +4,7 @@
 //! you need practical results — trading precision for speed, simplicity, or tractability.
 
 pub mod bounds;
+pub mod curves;
 pub mod error;
 pub mod primitives;
 pub mod simplify;

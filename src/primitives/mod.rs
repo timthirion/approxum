@@ -1,5 +1,6 @@
 //! Floating-point geometric primitives and operations.
 
+mod affine2;
 mod circle2;
 mod ellipse2;
 mod line2;
@@ -11,6 +12,7 @@ mod segment3;
 mod vec2;
 mod vec3;
 
+pub use affine2::Affine2;
 pub use circle2::Circle2;
 pub use ellipse2::Ellipse2;
 pub use line2::Line2;

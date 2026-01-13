@@ -40,6 +40,7 @@ mod minkowski;
 mod offset;
 mod skeleton;
 mod triangulate;
+mod visibility;
 
 pub use boolean::{polygon_difference, polygon_intersection, polygon_union, polygon_xor};
 pub use clip::{clip_polygon_by_convex, sutherland_hodgman};
@@ -54,4 +55,8 @@ pub use skeleton::{medial_axis, straight_skeleton, Skeleton, SkeletonEdge, Skele
 pub use triangulate::{
     triangulate_polygon, triangulate_polygon_indexed, triangulation_area, PolygonTriangle,
     TriangulationResult,
+};
+pub use visibility::{
+    is_visible, is_visible_with_obstacles, visibility_polygon, visibility_polygon_with_obstacles,
+    visible_area,
 };

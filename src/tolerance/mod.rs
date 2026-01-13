@@ -6,6 +6,7 @@
 mod frechet;
 mod hausdorff;
 mod predicates;
+mod weld;
 
 pub use frechet::{
     discrete_frechet_distance, discrete_frechet_distance_linear_space, frechet_distance_approx,
@@ -17,4 +18,8 @@ pub use hausdorff::{
 };
 pub use predicates::{
     orient2d, point_on_segment, segments_intersect, Orientation, SegmentIntersection,
+};
+pub use weld::{
+    remove_duplicate_vertices, snap_and_weld, snap_to_grid, weld_vertices, weld_vertices_indexed,
+    weld_vertices_keep_first,
 };

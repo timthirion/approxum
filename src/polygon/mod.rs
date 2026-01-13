@@ -35,8 +35,13 @@ mod boolean;
 mod clip;
 mod core;
 mod offset;
+mod triangulate;
 
 pub use boolean::{polygon_difference, polygon_intersection, polygon_union, polygon_xor};
 pub use clip::{clip_polygon_by_convex, sutherland_hodgman};
 pub use core::{polygon_area, polygon_centroid, polygon_contains, polygon_is_convex, Polygon};
 pub use offset::{offset_polygon, offset_polygon_simple, JoinStyle};
+pub use triangulate::{
+    triangulate_polygon, triangulate_polygon_indexed, triangulation_area, PolygonTriangle,
+    TriangulationResult,
+};

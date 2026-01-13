@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+<rect width="100%" height="100%" fill="#1a1a2e"/>
+<text x="300" y="30" font-family="system-ui, sans-serif" font-size="16" fill="#e0e0e0">Bounding Volume Hierarchy</text>
+<rect x="40" y="40" width="720" height="310" fill="#ff6b6b20" stroke="#ff6b6b" stroke-width="2"/>
+<rect x="45" y="45" width="260" height="300" fill="#ffd93d20" stroke="#ffd93d" stroke-width="1.5"/>
+<rect x="445" y="45" width="260" height="300" fill="#ffd93d20" stroke="#ffd93d" stroke-width="1.5"/>
+<rect x="48" y="48" width="160" height="135" fill="#6bcb7720" stroke="#6bcb77" stroke-width="1"/>
+<rect x="48" y="195" width="160" height="135" fill="#6bcb7720" stroke="#6bcb77" stroke-width="1"/>
+<rect x="448" y="48" width="165" height="135" fill="#6bcb7720" stroke="#6bcb77" stroke-width="1"/>
+<rect x="448" y="195" width="165" height="135" fill="#6bcb7720" stroke="#6bcb77" stroke-width="1"/>
+<rect x="50.0004774859473" y="67.37146599232005" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="90.42313268023594" y="166.2817231173276" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="57.9960326148461" y="92.84591915170074" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="68.41373077071954" y="87.33040321467425" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="140.97772387592653" y="56.19331631738246" width="25" height="24.999999999999993" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="159.53345367445814" y="136.29306689282674" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="132.57409706494107" y="90.64750024837303" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="195.27679305769325" y="69.03422776864804" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="545.9975421396078" y="80.80440529656633" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="463.4342850172057" y="84.434886234824" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="456.57606360185815" y="103.80515470223266" width="25" height="24.999999999999986" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="543.7732830137693" y="146.47455513146969" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="513.1639824194233" y="91.6740780963431" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="548.3689908371621" y="133.18548991477905" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="565.7356073282621" y="63.56559850475615" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="480.61151735971134" y="102.77074260210395" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="116.43521300471717" y="296.5445627292963" width="25.000000000000014" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="147.911197248887" y="289.2475427669633" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="105.01485883063498" y="204.4134287697325" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="107.65328830156508" y="213.42802278670396" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="190.81062099768187" y="298.5487269095818" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="61.680920831568486" y="260.980968440667" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="199.35719756117481" y="290.68278847842186" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="597.0292283044589" y="216.13476596193604" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="542.2869117291541" y="210.47387714600276" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="506.39192504028426" y="242.15205372713007" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="454.89626821667315" y="244.50109679087385" width="25" height="24.99999999999997" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="528.3612858093994" y="255.87752856511332" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="492.057086621244" y="303.3078658060132" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="470.38740671750236" y="211.0081232847984" width="25" height="25" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1.5"/>
+<rect x="50" y="365" width="15" height="15" fill="#ff6b6b20" stroke="#ff6b6b" stroke-width="1"/>
+<text x="70" y="377" font-family="system-ui, sans-serif" font-size="11" fill="#808080">Root</text>
+<rect x="130" y="365" width="15" height="15" fill="#ffd93d20" stroke="#ffd93d" stroke-width="1"/>
+<text x="150" y="377" font-family="system-ui, sans-serif" font-size="11" fill="#808080">Level 1</text>
+<rect x="220" y="365" width="15" height="15" fill="#6bcb7720" stroke="#6bcb77" stroke-width="1"/>
+<text x="240" y="377" font-family="system-ui, sans-serif" font-size="11" fill="#808080">Level 2</text>
+<rect x="320" y="365" width="15" height="15" fill="#00d4ff40" stroke="#00d4ff" stroke-width="1"/>
+<text x="340" y="377" font-family="system-ui, sans-serif" font-size="11" fill="#808080">Leaf AABBs</text>
+<text x="500" y="377" font-family="system-ui, sans-serif" font-size="11" fill="#606060">Spatial partitioning enables O(log n) queries</text>
+
+</svg>

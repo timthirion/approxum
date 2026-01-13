@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400">
+<rect width="100%" height="100%" fill="#1a1a2e"/>
+<text x="120" y="30" font-family="system-ui, sans-serif" font-size="16" fill="#e0e0e0">Cubic Bézier Curve</text>
+<line x1="50" y1="300" x2="100" y2="50" stroke="#4a4a6a" stroke-width="1.5"/>
+<line x1="100" y1="50" x2="300" y2="50" stroke="#4a4a6a" stroke-width="1.5"/>
+<line x1="300" y1="50" x2="350" y2="300" stroke="#4a4a6a" stroke-width="1.5"/>
+<polyline points="50.00,300.00 61.06,256.05 75.20,217.97 91.97,185.74 110.94,159.38 131.67,138.87 153.71,124.22 176.64,115.43 200.00,112.50 223.36,115.43 246.29,124.22 268.33,138.87 289.06,159.38 308.03,185.74 324.80,217.97 338.94,256.05 350.00,300.00" fill="none" stroke="#00d4ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="50" cy="300" r="6" fill="#ff6b6b" stroke="#ffffff" stroke-width="2"/>
+<circle cx="100" cy="50" r="6" fill="#ffd93d" stroke="#ffffff" stroke-width="2"/>
+<circle cx="300" cy="50" r="6" fill="#ffd93d" stroke="#ffffff" stroke-width="2"/>
+<circle cx="350" cy="300" r="6" fill="#ff6b6b" stroke="#ffffff" stroke-width="2"/>
+<text x="35" y="320" font-family="system-ui, sans-serif" font-size="12" fill="#808080">P₀</text>
+<text x="85" y="40" font-family="system-ui, sans-serif" font-size="12" fill="#808080">P₁</text>
+<text x="305" y="40" font-family="system-ui, sans-serif" font-size="12" fill="#808080">P₂</text>
+<text x="355" y="320" font-family="system-ui, sans-serif" font-size="12" fill="#808080">P₃</text>
+<g transform="translate(400, 0)">
+<text x="120" y="30" font-family="system-ui, sans-serif" font-size="16" fill="#e0e0e0">Circular Arc</text>
+<polyline points="50.00,250.00 57.85,282.63 72.70,312.72 93.83,338.80 120.19,359.57 150.49,374.01 183.22,381.42 216.78,381.42 249.51,374.01 279.81,359.57 306.17,338.80 327.30,312.72 342.15,282.63 350.00,250.00" fill="none" stroke="#6bcb77" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="200" cy="231.1764705882353" r="4" fill="#ffd93d" stroke="none" stroke-width="0"/>
+<line x1="200" y1="231.1764705882353" x2="50" y2="250" stroke="#4a4a6a" stroke-width="1"/>
+<text x="210" y="231.1764705882353" font-family="system-ui, sans-serif" font-size="10" fill="#808080">center</text>
+<circle cx="50" cy="250" r="5" fill="#ff6b6b" stroke="#ffffff" stroke-width="2"/>
+<circle cx="200" cy="80" r="5" fill="#ff6b6b" stroke="#ffffff" stroke-width="2"/>
+<circle cx="350" cy="250" r="5" fill="#ff6b6b" stroke="#ffffff" stroke-width="2"/>
+</g>
+<text x="280" y="380" font-family="system-ui, sans-serif" font-size="12" fill="#606060">Control points (yellow) • Endpoints (red)</text>
+
+</svg>

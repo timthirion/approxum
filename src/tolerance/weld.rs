@@ -381,6 +381,271 @@ pub fn snap_and_weld<F: Float>(points: &[Point2<F>], grid_size: F) -> Vec<Point2
     weld_vertices(&snapped, epsilon)
 }
 
+/// Removes degenerate (zero-length) edges from a polyline.
+///
+/// An edge is considered degenerate if its length is less than `epsilon`.
+/// This removes vertices that create such edges while preserving the
+/// overall shape of the polyline.
+///
+/// # Arguments
+///
+/// * `points` - Input polyline vertices
+/// * `epsilon` - Minimum edge length to keep
+///
+/// # Returns
+///
+/// A new polyline with degenerate edges removed.
+///
+/// # Example
+///
+/// ```
+/// use approxum::tolerance::remove_degenerate_edges;
+/// use approxum::Point2;
+///
+/// let points = vec![
+///     Point2::new(0.0_f64, 0.0),
+///     Point2::new(0.001, 0.0),  // Creates degenerate edge
+///     Point2::new(1.0, 0.0),
+///     Point2::new(2.0, 0.0),
+/// ];
+///
+/// let cleaned = remove_degenerate_edges(&points, 0.01);
+/// assert_eq!(cleaned.len(), 3);  // Middle point removed
+/// ```
+pub fn remove_degenerate_edges<F: Float>(points: &[Point2<F>], epsilon: F) -> Vec<Point2<F>> {
+    if points.len() <= 2 {
+        return points.to_vec();
+    }
+
+    let eps_sq = epsilon * epsilon;
+    let mut result = Vec::with_capacity(points.len());
+
+    // Always keep the first point
+    result.push(points[0]);
+
+    // Process middle points
+    for i in 1..points.len() - 1 {
+        let prev = result.last().unwrap();
+        let curr = &points[i];
+
+        // Check if edge from prev to curr is non-degenerate
+        let dx = curr.x - prev.x;
+        let dy = curr.y - prev.y;
+
+        if dx * dx + dy * dy > eps_sq {
+            result.push(*curr);
+        }
+    }
+
+    // Always keep the last point (unless it creates a degenerate edge)
+    let last = points.last().unwrap();
+    let prev = result.last().unwrap();
+    let dx = last.x - prev.x;
+    let dy = last.y - prev.y;
+
+    if dx * dx + dy * dy > eps_sq || result.len() == 1 {
+        result.push(*last);
+    }
+
+    result
+}
+
+/// Removes degenerate edges from a closed polygon.
+///
+/// Similar to `remove_degenerate_edges` but handles the wrap-around edge
+/// from the last vertex back to the first.
+///
+/// # Arguments
+///
+/// * `vertices` - Polygon vertices (first vertex is NOT repeated at end)
+/// * `epsilon` - Minimum edge length to keep
+///
+/// # Returns
+///
+/// A new polygon with degenerate edges removed.
+///
+/// # Example
+///
+/// ```
+/// use approxum::tolerance::remove_degenerate_edges_polygon;
+/// use approxum::Point2;
+///
+/// // Square with a nearly-duplicate vertex
+/// let vertices = vec![
+///     Point2::new(0.0_f64, 0.0),
+///     Point2::new(1.0, 0.0),
+///     Point2::new(1.001, 0.001),  // Nearly same as previous
+///     Point2::new(1.0, 1.0),
+///     Point2::new(0.0, 1.0),
+/// ];
+///
+/// let cleaned = remove_degenerate_edges_polygon(&vertices, 0.01);
+/// assert_eq!(cleaned.len(), 4);  // Back to a proper square
+/// ```
+pub fn remove_degenerate_edges_polygon<F: Float>(
+    vertices: &[Point2<F>],
+    epsilon: F,
+) -> Vec<Point2<F>> {
+    if vertices.len() <= 3 {
+        return vertices.to_vec();
+    }
+
+    let eps_sq = epsilon * epsilon;
+    let n = vertices.len();
+
+    // First pass: mark which vertices to keep
+    let mut keep = vec![true; n];
+
+    for i in 0..n {
+        if !keep[i] {
+            continue;
+        }
+
+        let next = (i + 1) % n;
+
+        // Find the next vertex that's still marked as keep
+        let mut j = next;
+        while !keep[j] && j != i {
+            j = (j + 1) % n;
+        }
+
+        if j == i {
+            break; // All vertices removed (shouldn't happen with len > 3)
+        }
+
+        let dx = vertices[j].x - vertices[i].x;
+        let dy = vertices[j].y - vertices[i].y;
+
+        if dx * dx + dy * dy <= eps_sq {
+            // Mark the next vertex for removal (keep the earlier one)
+            keep[j] = false;
+        }
+    }
+
+    // Collect kept vertices
+    let mut result: Vec<Point2<F>> = vertices
+        .iter()
+        .zip(keep.iter())
+        .filter(|(_, &k)| k)
+        .map(|(v, _)| *v)
+        .collect();
+
+    // Ensure we have at least 3 vertices for a valid polygon
+    if result.len() < 3 {
+        return vertices.to_vec();
+    }
+
+    // Second pass: check wrap-around edge
+    let last_idx = result.len() - 1;
+    let dx = result[0].x - result[last_idx].x;
+    let dy = result[0].y - result[last_idx].y;
+
+    if dx * dx + dy * dy <= eps_sq && result.len() > 3 {
+        result.pop();
+    }
+
+    result
+}
+
+/// Removes collinear vertices from a polyline.
+///
+/// A vertex is collinear if it lies on the line between its neighbors
+/// (within the given tolerance). Removing such vertices simplifies the
+/// polyline without changing its shape.
+///
+/// # Arguments
+///
+/// * `points` - Input polyline vertices
+/// * `epsilon` - Maximum perpendicular distance for a point to be considered collinear
+///
+/// # Returns
+///
+/// A new polyline with collinear vertices removed.
+///
+/// # Example
+///
+/// ```
+/// use approxum::tolerance::remove_collinear_vertices;
+/// use approxum::Point2;
+///
+/// // Three collinear points
+/// let points = vec![
+///     Point2::new(0.0_f64, 0.0),
+///     Point2::new(1.0, 0.0),  // Collinear, will be removed
+///     Point2::new(2.0, 0.0),
+/// ];
+///
+/// let cleaned = remove_collinear_vertices(&points, 0.01);
+/// assert_eq!(cleaned.len(), 2);
+/// ```
+pub fn remove_collinear_vertices<F: Float>(points: &[Point2<F>], epsilon: F) -> Vec<Point2<F>> {
+    if points.len() <= 2 {
+        return points.to_vec();
+    }
+
+    let mut result = Vec::with_capacity(points.len());
+
+    // Always keep first point
+    result.push(points[0]);
+
+    for i in 1..points.len() - 1 {
+        let prev = result.last().unwrap();
+        let curr = &points[i];
+        let next = &points[i + 1];
+
+        // Compute perpendicular distance from curr to line prev-next
+        let dist = perpendicular_distance(*prev, *next, *curr);
+
+        if dist > epsilon {
+            result.push(*curr);
+        }
+    }
+
+    // Always keep last point
+    result.push(*points.last().unwrap());
+
+    result
+}
+
+/// Computes perpendicular distance from point p to line segment a-b.
+fn perpendicular_distance<F: Float>(a: Point2<F>, b: Point2<F>, p: Point2<F>) -> F {
+    let dx = b.x - a.x;
+    let dy = b.y - a.y;
+    let len_sq = dx * dx + dy * dy;
+
+    if len_sq < F::epsilon() {
+        // Degenerate segment, return distance to a
+        return ((p.x - a.x).powi(2) + (p.y - a.y).powi(2)).sqrt();
+    }
+
+    // Perpendicular distance = |cross product| / |line length|
+    let cross = (p.x - a.x) * dy - (p.y - a.y) * dx;
+    cross.abs() / len_sq.sqrt()
+}
+
+/// Cleans up a polyline by removing both degenerate edges and collinear vertices.
+///
+/// This is a convenience function that combines `remove_degenerate_edges`
+/// and `remove_collinear_vertices`.
+///
+/// # Arguments
+///
+/// * `points` - Input polyline vertices
+/// * `edge_epsilon` - Minimum edge length
+/// * `collinear_epsilon` - Maximum perpendicular distance for collinearity
+///
+/// # Returns
+///
+/// A cleaned polyline.
+pub fn cleanup_polyline<F: Float>(
+    points: &[Point2<F>],
+    edge_epsilon: F,
+    collinear_epsilon: F,
+) -> Vec<Point2<F>> {
+    let no_degenerate = remove_degenerate_edges(points, edge_epsilon);
+    remove_collinear_vertices(&no_degenerate, collinear_epsilon)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -596,5 +861,148 @@ mod tests {
         // Should all merge into one cluster
         let welded = weld_vertices(&points, 0.2);
         assert_eq!(welded.len(), 1);
+    }
+
+    #[test]
+    fn test_remove_degenerate_edges_basic() {
+        let points = vec![
+            Point2::new(0.0, 0.0),
+            Point2::new(0.001, 0.0), // Degenerate
+            Point2::new(1.0, 0.0),
+            Point2::new(2.0, 0.0),
+        ];
+
+        let cleaned = remove_degenerate_edges(&points, 0.01);
+        assert_eq!(cleaned.len(), 3);
+        assert_eq!(cleaned[0], points[0]);
+        assert_eq!(cleaned[1], points[2]);
+        assert_eq!(cleaned[2], points[3]);
+    }
+
+    #[test]
+    fn test_remove_degenerate_edges_preserves_endpoints() {
+        let points = vec![
+            Point2::new(0.0, 0.0),
+            Point2::new(1.0, 0.0),
+        ];
+
+        let cleaned = remove_degenerate_edges(&points, 0.01);
+        assert_eq!(cleaned.len(), 2);
+    }
+
+    #[test]
+    fn test_remove_degenerate_edges_all_degenerate() {
+        let points = vec![
+            Point2::new(0.0, 0.0),
+            Point2::new(0.001, 0.0),
+            Point2::new(0.002, 0.0),
+            Point2::new(0.003, 0.0),
+        ];
+
+        let cleaned = remove_degenerate_edges(&points, 0.01);
+        // Should keep first and last
+        assert_eq!(cleaned.len(), 2);
+        assert_eq!(cleaned[0], points[0]);
+        assert_eq!(cleaned[1], points[3]);
+    }
+
+    #[test]
+    fn test_remove_degenerate_edges_empty() {
+        let points: Vec<Point2<f64>> = vec![];
+        let cleaned = remove_degenerate_edges(&points, 0.01);
+        assert!(cleaned.is_empty());
+    }
+
+    #[test]
+    fn test_remove_degenerate_edges_polygon_basic() {
+        let vertices = vec![
+            Point2::new(0.0, 0.0),
+            Point2::new(1.0, 0.0),
+            Point2::new(1.001, 0.001), // Nearly duplicate
+            Point2::new(1.0, 1.0),
+            Point2::new(0.0, 1.0),
+        ];
+
+        let cleaned = remove_degenerate_edges_polygon(&vertices, 0.01);
+        assert_eq!(cleaned.len(), 4);
+    }
+
+    #[test]
+    fn test_remove_degenerate_edges_polygon_wrap_around() {
+        // Last vertex is very close to first
+        let vertices = vec![
+            Point2::new(0.0, 0.0),
+            Point2::new(1.0, 0.0),
+            Point2::new(1.0, 1.0),
+            Point2::new(0.001, 0.001), // Close to first vertex
+        ];
+
+        let cleaned = remove_degenerate_edges_polygon(&vertices, 0.01);
+        assert_eq!(cleaned.len(), 3);
+    }
+
+    #[test]
+    fn test_remove_collinear_vertices_basic() {
+        let points = vec![
+            Point2::new(0.0, 0.0),
+            Point2::new(1.0, 0.0), // Collinear
+            Point2::new(2.0, 0.0), // Collinear
+            Point2::new(3.0, 0.0),
+        ];
+
+        let cleaned = remove_collinear_vertices(&points, 0.01);
+        assert_eq!(cleaned.len(), 2);
+        assert_eq!(cleaned[0], points[0]);
+        assert_eq!(cleaned[1], points[3]);
+    }
+
+    #[test]
+    fn test_remove_collinear_vertices_non_collinear() {
+        let points = vec![
+            Point2::new(0.0, 0.0),
+            Point2::new(1.0, 1.0), // Not collinear
+            Point2::new(2.0, 0.0),
+        ];
+
+        let cleaned = remove_collinear_vertices(&points, 0.01);
+        assert_eq!(cleaned.len(), 3);
+    }
+
+    #[test]
+    fn test_remove_collinear_vertices_nearly_collinear() {
+        let points = vec![
+            Point2::new(0.0, 0.0),
+            Point2::new(1.0, 0.005), // Almost collinear
+            Point2::new(2.0, 0.0),
+        ];
+
+        // With epsilon 0.01, the middle point should be removed
+        let cleaned = remove_collinear_vertices(&points, 0.01);
+        assert_eq!(cleaned.len(), 2);
+    }
+
+    #[test]
+    fn test_cleanup_polyline() {
+        let points = vec![
+            Point2::new(0.0, 0.0),
+            Point2::new(0.001, 0.0), // Degenerate edge
+            Point2::new(1.0, 0.0),   // Collinear
+            Point2::new(2.0, 0.0),
+        ];
+
+        let cleaned = cleanup_polyline(&points, 0.01, 0.01);
+        assert_eq!(cleaned.len(), 2);
+        assert_eq!(cleaned[0], points[0]);
+        assert_eq!(cleaned[1], points[3]);
+    }
+
+    #[test]
+    fn test_perpendicular_distance() {
+        let a = Point2::new(0.0, 0.0);
+        let b = Point2::new(2.0, 0.0);
+        let p = Point2::new(1.0, 1.0);
+
+        let dist = perpendicular_distance(a, b, p);
+        assert!(approx_eq(dist, 1.0, 1e-10));
     }
 }

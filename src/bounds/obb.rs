@@ -24,6 +24,7 @@
 //! println!("Center: {:?}, Area: {}", obb.center, obb.area());
 //! ```
 
+use crate::hull::convex_hull;
 use crate::primitives::{Point2, Vec2};
 use num_traits::Float;
 use std::f64::consts::PI;
@@ -403,60 +404,6 @@ fn project_corners<F: Float>(corners: &[Point2<F>; 4], axis: Vec2<F>) -> (F, F) 
     }
 
     (min, max)
-}
-
-/// Computes the convex hull using Graham scan.
-fn convex_hull<F: Float>(points: &[Point2<F>]) -> Vec<Point2<F>> {
-    if points.len() < 3 {
-        return points.to_vec();
-    }
-
-    // Find the bottom-most point (and leftmost if tie)
-    let mut start_idx = 0;
-    for (i, p) in points.iter().enumerate() {
-        if p.y < points[start_idx].y
-            || (p.y == points[start_idx].y && p.x < points[start_idx].x)
-        {
-            start_idx = i;
-        }
-    }
-    let start = points[start_idx];
-
-    // Sort points by polar angle with respect to start
-    let mut sorted: Vec<Point2<F>> = points
-        .iter()
-        .copied()
-        .filter(|p| *p != start)
-        .collect();
-
-    sorted.sort_by(|a, b| {
-        let angle_a = (a.y - start.y).atan2(a.x - start.x);
-        let angle_b = (b.y - start.y).atan2(b.x - start.x);
-        angle_a.partial_cmp(&angle_b).unwrap_or(std::cmp::Ordering::Equal)
-    });
-
-    // Graham scan
-    let mut hull = vec![start];
-
-    for p in sorted {
-        while hull.len() > 1 {
-            let top = hull[hull.len() - 1];
-            let next_to_top = hull[hull.len() - 2];
-
-            // Cross product to determine turn direction
-            let cross = (top.x - next_to_top.x) * (p.y - next_to_top.y)
-                - (top.y - next_to_top.y) * (p.x - next_to_top.x);
-
-            if cross <= F::zero() {
-                hull.pop();
-            } else {
-                break;
-            }
-        }
-        hull.push(p);
-    }
-
-    hull
 }
 
 #[cfg(test)]

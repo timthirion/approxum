@@ -7,6 +7,7 @@ pub mod bounds;
 pub mod curves;
 pub mod distance;
 pub mod error;
+pub mod hull;
 pub mod primitives;
 pub mod sampling;
 pub mod simplify;

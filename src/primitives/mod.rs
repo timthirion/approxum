@@ -2,6 +2,7 @@
 
 mod circle2;
 mod ellipse2;
+mod line2;
 mod point2;
 mod point3;
 mod ray2;
@@ -12,6 +13,7 @@ mod vec3;
 
 pub use circle2::Circle2;
 pub use ellipse2::Ellipse2;
+pub use line2::Line2;
 pub use point2::Point2;
 pub use point3::Point3;
 pub use ray2::Ray2;

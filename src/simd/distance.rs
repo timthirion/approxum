@@ -1,5 +1,7 @@
 //! SIMD-accelerated distance computations.
 
+#![allow(clippy::needless_range_loop)]
+
 use wide::{f32x4, CmpLe};
 
 use crate::primitives::{Point2, Segment2};

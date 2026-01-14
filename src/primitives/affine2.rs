@@ -651,8 +651,7 @@ mod tests {
 
     #[test]
     fn test_then() {
-        let t: Affine2<f64> = Affine2::scale(2.0)
-            .then(Affine2::translation(Vec2::new(10.0, 0.0)));
+        let t: Affine2<f64> = Affine2::scale(2.0).then(Affine2::translation(Vec2::new(10.0, 0.0)));
 
         let p = Point2::new(1.0, 0.0);
         let result = t.apply_point(p);
@@ -673,8 +672,7 @@ mod tests {
 
     #[test]
     fn test_then_rotate() {
-        let t: Affine2<f64> = Affine2::translation(Vec2::new(1.0, 0.0))
-            .then_rotate(FRAC_PI_2);
+        let t: Affine2<f64> = Affine2::translation(Vec2::new(1.0, 0.0)).then_rotate(FRAC_PI_2);
 
         let p = Point2::new(0.0, 0.0);
         let result = t.apply_point(p);

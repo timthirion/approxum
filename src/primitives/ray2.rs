@@ -48,7 +48,10 @@ impl<F: Float> Ray2<F> {
     ///
     /// Returns `None` if the direction vector is zero.
     pub fn normalized(origin: Point2<F>, direction: Vec2<F>) -> Option<Self> {
-        direction.normalize().map(|d| Self { origin, direction: d })
+        direction.normalize().map(|d| Self {
+            origin,
+            direction: d,
+        })
     }
 
     /// Returns the point along the ray at parameter t.
@@ -339,8 +342,16 @@ mod tests {
     fn test_distance_to_point() {
         let ray: Ray2<f64> = Ray2::new(Point2::origin(), Vec2::new(1.0, 0.0));
 
-        assert_relative_eq!(ray.distance_to_point(Point2::new(5.0, 3.0)), 3.0, epsilon = 1e-10);
-        assert_relative_eq!(ray.distance_to_point(Point2::new(5.0, 0.0)), 0.0, epsilon = 1e-10);
+        assert_relative_eq!(
+            ray.distance_to_point(Point2::new(5.0, 3.0)),
+            3.0,
+            epsilon = 1e-10
+        );
+        assert_relative_eq!(
+            ray.distance_to_point(Point2::new(5.0, 0.0)),
+            0.0,
+            epsilon = 1e-10
+        );
     }
 
     #[test]

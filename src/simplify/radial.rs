@@ -67,10 +67,10 @@ pub fn radial_indices<F: Float>(points: &[Point2<F>], min_distance: F) -> Vec<us
     let mut last_kept = points[0];
 
     // Check each point against the last kept point
-    for i in 1..points.len() - 1 {
-        if points[i].distance_squared(last_kept) >= min_dist_sq {
+    for (i, &point) in points.iter().enumerate().take(points.len() - 1).skip(1) {
+        if point.distance_squared(last_kept) >= min_dist_sq {
             indices.push(i);
-            last_kept = points[i];
+            last_kept = point;
         }
     }
 
@@ -311,9 +311,7 @@ mod tests {
 
     #[test]
     fn test_radial_by_count() {
-        let points: Vec<Point2<f64>> = (0..100)
-            .map(|i| Point2::new(i as f64, 0.0))
-            .collect();
+        let points: Vec<Point2<f64>> = (0..100).map(|i| Point2::new(i as f64, 0.0)).collect();
 
         let simplified = radial_by_count(&points, 10);
 
@@ -364,9 +362,9 @@ mod tests {
     fn test_radial_diagonal_movement() {
         let points = vec![
             Point2::new(0.0, 0.0),
-            Point2::new(0.5, 0.5),  // Distance ~0.707
-            Point2::new(1.0, 1.0),  // Distance ~0.707 from previous
-            Point2::new(2.0, 2.0),  // Distance ~1.414 from previous
+            Point2::new(0.5, 0.5), // Distance ~0.707
+            Point2::new(1.0, 1.0), // Distance ~0.707 from previous
+            Point2::new(2.0, 2.0), // Distance ~1.414 from previous
         ];
 
         let simplified = radial(&points, 1.0);

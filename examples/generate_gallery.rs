@@ -70,7 +70,13 @@ impl Svg {
         ));
     }
 
-    fn polyline_path(&mut self, points: &[Point2<f64>], fill: &str, stroke: &str, stroke_width: f64) {
+    fn polyline_path(
+        &mut self,
+        points: &[Point2<f64>],
+        fill: &str,
+        stroke: &str,
+        stroke_width: f64,
+    ) {
         if points.is_empty() {
             return;
         }
@@ -94,7 +100,13 @@ impl Svg {
     }
 
     /// Polygon with outline drawn behind fill (for shapes that work on any background)
-    fn polygon_outlined(&mut self, points: &[Point2<f64>], fill: &str, outline: &str, outline_width: f64) {
+    fn polygon_outlined(
+        &mut self,
+        points: &[Point2<f64>],
+        fill: &str,
+        outline: &str,
+        outline_width: f64,
+    ) {
         if points.is_empty() {
             return;
         }
@@ -204,11 +216,12 @@ fn generate_logo() -> String {
         Point2::new(x + bowl_w, baseline - x_height),
         Point2::new(x + bowl_w, baseline),
     ];
-    render_strokes(vec![bowl, stem], &options, &mut all_paths); cursor_x += bowl_w + stroke_weight / 2.0 + letter_gap;
+    render_strokes(vec![bowl, stem], &options, &mut all_paths);
+    cursor_x += bowl_w + stroke_weight / 2.0 + letter_gap;
 
     // ===== LETTER 'p' (first) =====
     let x = cursor_x;
-    let p_bowl_w = 32.0;  // Width of bowl extending from stem
+    let p_bowl_w = 32.0; // Width of bowl extending from stem
     let p_bowl_h = x_height * 0.85;
     // Stem with descender
     let stem = vec![
@@ -220,12 +233,13 @@ fn generate_logo() -> String {
         .map(|i| {
             let angle = -PI / 2.0 + PI * (i as f64) / 16.0;
             Point2::new(
-                x + stroke_weight / 2.0 + p_bowl_w * angle.cos(),  // Starts at stem when cos=0
+                x + stroke_weight / 2.0 + p_bowl_w * angle.cos(), // Starts at stem when cos=0
                 baseline - x_height + p_bowl_h / 2.0 + (p_bowl_h / 2.0) * angle.sin(),
             )
         })
         .collect();
-    render_strokes(vec![stem, bowl], &options, &mut all_paths); cursor_x += p_bowl_w + stroke_weight + letter_gap;
+    render_strokes(vec![stem, bowl], &options, &mut all_paths);
+    cursor_x += p_bowl_w + stroke_weight + letter_gap;
 
     // ===== LETTER 'p' (second) =====
     let x = cursor_x;
@@ -237,12 +251,13 @@ fn generate_logo() -> String {
         .map(|i| {
             let angle = -PI / 2.0 + PI * (i as f64) / 16.0;
             Point2::new(
-                x + stroke_weight / 2.0 + p_bowl_w * angle.cos(),  // Starts at stem when cos=0
+                x + stroke_weight / 2.0 + p_bowl_w * angle.cos(), // Starts at stem when cos=0
                 baseline - x_height + p_bowl_h / 2.0 + (p_bowl_h / 2.0) * angle.sin(),
             )
         })
         .collect();
-    render_strokes(vec![stem, bowl], &options, &mut all_paths); cursor_x += p_bowl_w + stroke_weight + letter_gap;
+    render_strokes(vec![stem, bowl], &options, &mut all_paths);
+    cursor_x += p_bowl_w + stroke_weight + letter_gap;
 
     // ===== LETTER 'r' =====
     let x = cursor_x;
@@ -262,7 +277,8 @@ fn generate_logo() -> String {
             )
         })
         .collect();
-    render_strokes(vec![stem, shoulder], &options, &mut all_paths); cursor_x += r_width + stroke_weight / 2.0 + letter_gap;
+    render_strokes(vec![stem, shoulder], &options, &mut all_paths);
+    cursor_x += r_width + stroke_weight / 2.0 + letter_gap;
 
     // ===== LETTER 'o' =====
     let x = cursor_x;
@@ -277,7 +293,8 @@ fn generate_logo() -> String {
             Point2::new(o_cx + o_rx * angle.cos(), o_cy + o_ry * angle.sin())
         })
         .collect();
-    render_strokes(vec![oval], &options, &mut all_paths); cursor_x += o_w + letter_gap;
+    render_strokes(vec![oval], &options, &mut all_paths);
+    cursor_x += o_w + letter_gap;
 
     // ===== LETTER 'x' =====
     let x = cursor_x;
@@ -291,7 +308,8 @@ fn generate_logo() -> String {
         Point2::new(x + x_w, baseline - x_height),
         Point2::new(x, baseline),
     ];
-    render_strokes(vec![diag1, diag2], &options, &mut all_paths); cursor_x += x_w + letter_gap;
+    render_strokes(vec![diag1, diag2], &options, &mut all_paths);
+    cursor_x += x_w + letter_gap;
 
     // ===== LETTER 'u' =====
     let x = cursor_x;
@@ -320,7 +338,12 @@ fn generate_logo() -> String {
         Point2::new(x + u_w - stroke_weight / 3.0, baseline - x_height),
         Point2::new(x + u_w - stroke_weight / 3.0, baseline),
     ];
-    render_strokes(vec![left_stem, u_curve, right_stem, right_tail], &options, &mut all_paths); cursor_x += u_w + letter_gap;
+    render_strokes(
+        vec![left_stem, u_curve, right_stem, right_tail],
+        &options,
+        &mut all_paths,
+    );
+    cursor_x += u_w + letter_gap;
 
     // ===== LETTER 'm' =====
     let x = cursor_x;
@@ -334,10 +357,10 @@ fn generate_logo() -> String {
     // First arch (goes up from stem, arcs over, comes down)
     let arch1: Vec<Point2<f64>> = (0..=12)
         .map(|i| {
-            let angle = PI * (i as f64) / 12.0;  // 0 to PI
+            let angle = PI * (i as f64) / 12.0; // 0 to PI
             Point2::new(
                 x + stroke_weight / 2.0 + (hump_w / 2.0) * (1.0 - angle.cos()),
-                baseline - x_height * (angle.sin()),  // goes up then down
+                baseline - x_height * (angle.sin()), // goes up then down
             )
         })
         .collect();
@@ -472,7 +495,14 @@ fn generate_visibility() -> String {
 
     // Draw light rays from viewpoint to visibility polygon vertices
     for v in vis.vertices.iter().take(20) {
-        svg.line(viewpoint.x, viewpoint.y, v.x, v.y, "rgba(255,215,0,0.15)", 0.5);
+        svg.line(
+            viewpoint.x,
+            viewpoint.y,
+            v.x,
+            v.y,
+            "rgba(255,215,0,0.15)",
+            0.5,
+        );
     }
 
     // Draw viewpoint (light source)
@@ -685,8 +715,12 @@ fn generate_curve_offset() -> String {
     svg.polyline_path(&main_curve, "none", "#2c3e50", 3.0);
 
     // Draw control points and handles
-    svg.line(curve.p0.x, curve.p0.y, curve.p1.x, curve.p1.y, "#e74c3c", 1.0);
-    svg.line(curve.p2.x, curve.p2.y, curve.p3.x, curve.p3.y, "#e74c3c", 1.0);
+    svg.line(
+        curve.p0.x, curve.p0.y, curve.p1.x, curve.p1.y, "#e74c3c", 1.0,
+    );
+    svg.line(
+        curve.p2.x, curve.p2.y, curve.p3.x, curve.p3.y, "#e74c3c", 1.0,
+    );
     svg.circle(curve.p0.x, curve.p0.y, 5.0, "#2c3e50", "#fff", 1.5);
     svg.circle(curve.p1.x, curve.p1.y, 4.0, "#e74c3c", "#fff", 1.5);
     svg.circle(curve.p2.x, curve.p2.y, 4.0, "#e74c3c", "#fff", 1.5);

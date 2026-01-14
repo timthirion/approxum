@@ -130,11 +130,17 @@ impl<F: Float> HermiteSpline2<F> {
             let tangent = if i == 0 {
                 let dx = points[1].x - points[0].x;
                 let dy = points[1].y - points[0].y;
-                Vec2::new(scale * F::from(2.0).unwrap() * dx, scale * F::from(2.0).unwrap() * dy)
+                Vec2::new(
+                    scale * F::from(2.0).unwrap() * dx,
+                    scale * F::from(2.0).unwrap() * dy,
+                )
             } else if i == n - 1 {
                 let dx = points[n - 1].x - points[n - 2].x;
                 let dy = points[n - 1].y - points[n - 2].y;
-                Vec2::new(scale * F::from(2.0).unwrap() * dx, scale * F::from(2.0).unwrap() * dy)
+                Vec2::new(
+                    scale * F::from(2.0).unwrap() * dx,
+                    scale * F::from(2.0).unwrap() * dy,
+                )
             } else {
                 Vec2::new(
                     scale * (points[i + 1].x - points[i - 1].x),
@@ -222,10 +228,10 @@ impl<F: Float> HermiteSpline2<F> {
         let three = two + one;
 
         // Hermite basis functions
-        let h00 = two * t3 - three * t2 + one;  // 2t³ - 3t² + 1
-        let h10 = t3 - two * t2 + t;            // t³ - 2t² + t
-        let h01 = -two * t3 + three * t2;       // -2t³ + 3t²
-        let h11 = t3 - t2;                      // t³ - t²
+        let h00 = two * t3 - three * t2 + one; // 2t³ - 3t² + 1
+        let h10 = t3 - two * t2 + t; // t³ - 2t² + t
+        let h01 = -two * t3 + three * t2; // -2t³ + 3t²
+        let h11 = t3 - t2; // t³ - t²
 
         Point2::new(
             h00 * p0.x + h10 * m0.x + h01 * p1.x + h11 * m1.x,
@@ -272,10 +278,10 @@ impl<F: Float> HermiteSpline2<F> {
         let six = three + three;
 
         // Derivatives of Hermite basis functions
-        let dh00 = six * t2 - six * t;           // 6t² - 6t
-        let dh10 = three * t2 - four * t + one;  // 3t² - 4t + 1
-        let dh01 = -six * t2 + six * t;          // -6t² + 6t
-        let dh11 = three * t2 - two * t;         // 3t² - 2t
+        let dh00 = six * t2 - six * t; // 6t² - 6t
+        let dh10 = three * t2 - four * t + one; // 3t² - 4t + 1
+        let dh01 = -six * t2 + six * t; // -6t² + 6t
+        let dh11 = three * t2 - two * t; // 3t² - 2t
 
         Vec2::new(
             dh00 * p0.x + dh10 * m0.x + dh01 * p1.x + dh11 * m1.x,

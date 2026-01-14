@@ -100,8 +100,8 @@ fn rdp_recursive<F: Float>(
     let mut max_dist = F::zero();
     let mut max_idx = start;
 
-    for i in (start + 1)..end {
-        let dist = segment.distance_to_point(points[i]);
+    for (i, &point) in points.iter().enumerate().take(end).skip(start + 1) {
+        let dist = segment.distance_to_point(point);
         if dist > max_dist {
             max_dist = dist;
             max_idx = i;
@@ -176,9 +176,9 @@ mod tests {
         // Line with small deviations that should be smoothed out
         let points: Vec<Point2<f64>> = vec![
             Point2::new(0.0, 0.0),
-            Point2::new(1.0, 0.05), // Small deviation
+            Point2::new(1.0, 0.05),  // Small deviation
             Point2::new(2.0, -0.03), // Small deviation
-            Point2::new(3.0, 0.02), // Small deviation
+            Point2::new(3.0, 0.02),  // Small deviation
             Point2::new(4.0, 0.0),
         ];
         let result = rdp(&points, 0.1);
@@ -201,18 +201,20 @@ mod tests {
         assert!(result.len() >= 3);
 
         // The peak point should be preserved
-        assert!(result.iter().any(|p| (p.x - 5.0).abs() < 0.01 && (p.y - 5.0).abs() < 0.01));
+        assert!(result
+            .iter()
+            .any(|p| (p.x - 5.0).abs() < 0.01 && (p.y - 5.0).abs() < 0.01));
     }
 
     #[test]
     fn test_rdp_indices() {
         let points: Vec<Point2<f64>> = vec![
-            Point2::new(0.0, 0.0),  // 0 - keep
-            Point2::new(1.0, 0.0),  // 1 - remove
-            Point2::new(2.0, 0.0),  // 2 - remove
-            Point2::new(3.0, 5.0),  // 3 - keep (significant deviation)
-            Point2::new(4.0, 0.0),  // 4 - remove
-            Point2::new(5.0, 0.0),  // 5 - keep (endpoint)
+            Point2::new(0.0, 0.0), // 0 - keep
+            Point2::new(1.0, 0.0), // 1 - remove
+            Point2::new(2.0, 0.0), // 2 - remove
+            Point2::new(3.0, 5.0), // 3 - keep (significant deviation)
+            Point2::new(4.0, 0.0), // 4 - remove
+            Point2::new(5.0, 0.0), // 5 - keep (endpoint)
         ];
         let indices = rdp_indices(&points, 0.5);
 
@@ -256,10 +258,10 @@ mod tests {
             Point2::new(2.0, 0.0),
             Point2::new(3.0, 0.1),
             Point2::new(4.0, 0.0),
-            Point2::new(5.0, 3.0),  // Significant turn
+            Point2::new(5.0, 3.0), // Significant turn
             Point2::new(6.0, 3.1),
             Point2::new(7.0, 3.0),
-            Point2::new(8.0, 0.0),  // Return
+            Point2::new(8.0, 0.0), // Return
             Point2::new(9.0, 0.1),
             Point2::new(10.0, 0.0),
         ];

@@ -253,11 +253,7 @@ pub fn cubic_curvature<F: Float>(curve: &CubicBezier2<F>, t: F) -> F {
 // ============================================================================
 
 /// Offset point along the normal at parameter t.
-fn offset_point_quadratic<F: Float>(
-    curve: &QuadraticBezier2<F>,
-    t: F,
-    distance: F,
-) -> Point2<F> {
+fn offset_point_quadratic<F: Float>(curve: &QuadraticBezier2<F>, t: F, distance: F) -> Point2<F> {
     let point = curve.eval(t);
     let tangent = curve.derivative_at(t);
 
@@ -313,6 +309,7 @@ fn offset_quadratic_adaptive<F: Float>(
     points
 }
 
+#[allow(clippy::too_many_arguments)]
 fn subdivide_quadratic_offset<F: Float>(
     curve: &QuadraticBezier2<F>,
     distance: F,
@@ -387,6 +384,7 @@ fn offset_cubic_adaptive<F: Float>(
     points
 }
 
+#[allow(clippy::too_many_arguments)]
 fn subdivide_cubic_offset<F: Float>(
     curve: &CubicBezier2<F>,
     distance: F,
@@ -438,7 +436,11 @@ fn subdivide_cubic_offset<F: Float>(
 }
 
 /// Distance from point to line defined by two points.
-fn point_to_line_distance<F: Float>(point: Point2<F>, line_start: Point2<F>, line_end: Point2<F>) -> F {
+fn point_to_line_distance<F: Float>(
+    point: Point2<F>,
+    line_start: Point2<F>,
+    line_end: Point2<F>,
+) -> F {
     let dx = line_end.x - line_start.x;
     let dy = line_end.y - line_start.y;
     let len_sq = dx * dx + dy * dy;
@@ -468,9 +470,9 @@ fn fit_quadratics_to_polyline<F: Float>(points: &[Point2<F>]) -> Vec<QuadraticBe
         // Control point: intersection of tangent lines, or midpoint as fallback
         let p1 = if i + 1 < points.len() {
             // Use the middle point projected onto the control polygon
-            let mid = points[i + 1];
+
             // Simple approximation: use the actual midpoint
-            mid
+            points[i + 1]
         } else {
             Point2::new(
                 (p0.x + p2.x) / (F::one() + F::one()),
@@ -511,10 +513,7 @@ fn fit_cubics_to_polyline<F: Float>(points: &[Point2<F>], _tolerance: F) -> Vec<
         let third = F::one() / F::from(3.0).unwrap();
         let p0 = points[0];
         let p3 = points[1];
-        let p1 = Point2::new(
-            p0.x + third * (p3.x - p0.x),
-            p0.y + third * (p3.y - p0.y),
-        );
+        let p1 = Point2::new(p0.x + third * (p3.x - p0.x), p0.y + third * (p3.y - p0.y));
         let p2 = Point2::new(
             p0.x + (F::one() - third) * (p3.x - p0.x),
             p0.y + (F::one() - third) * (p3.y - p0.y),

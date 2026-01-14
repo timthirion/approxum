@@ -48,8 +48,8 @@ pub use boolean::{polygon_difference, polygon_intersection, polygon_union, polyg
 pub use clip::{clip_polygon_by_convex, sutherland_hodgman};
 pub use core::{polygon_area, polygon_centroid, polygon_contains, polygon_is_convex, Polygon};
 pub use decompose::{
-    convex_decomposition, count_reflex_vertices, find_reflex_vertices, optimal_convex_decomposition,
-    triangulate_decomposition,
+    convex_decomposition, count_reflex_vertices, find_reflex_vertices,
+    optimal_convex_decomposition, triangulate_decomposition,
 };
 pub use minkowski::{minkowski_difference, minkowski_sum, minkowski_sum_convex, polygons_collide};
 pub use offset::{offset_polygon, offset_polygon_simple, JoinStyle};

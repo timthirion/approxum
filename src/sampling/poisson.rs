@@ -217,10 +217,7 @@ impl<F: Float> PoissonDiskSampler<F> {
         // Random radius in [r, 2r]
         let r = self.min_distance * (one + self.random_f());
 
-        Point2::new(
-            center.x + r * angle.cos(),
-            center.y + r * angle.sin(),
-        )
+        Point2::new(center.x + r * angle.cos(), center.y + r * angle.sin())
     }
 
     /// Simple xorshift64 PRNG - returns value in [0, 1).
@@ -362,8 +359,7 @@ mod tests {
 
     #[test]
     fn test_poisson_sampler_reuse() {
-        let mut sampler: PoissonDiskSampler<f64> =
-            PoissonDiskSampler::new(10.0, 10.0, 1.0, 12345);
+        let mut sampler: PoissonDiskSampler<f64> = PoissonDiskSampler::new(10.0, 10.0, 1.0, 12345);
 
         let points1 = sampler.generate(30);
         assert!(!points1.is_empty());

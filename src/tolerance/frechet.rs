@@ -152,11 +152,11 @@ pub fn discrete_frechet_distance_linear_space<F: Float>(p: &[Point2<F>], q: &[Po
     }
 
     // Process remaining rows
-    for i in 1..n {
-        curr[0] = prev[0].max(p[i].distance(q[0]));
+    for p_point in p.iter().take(n).skip(1) {
+        curr[0] = prev[0].max(p_point.distance(q[0]));
 
         for j in 1..m {
-            let dist = p[i].distance(q[j]);
+            let dist = p_point.distance(q[j]);
             let prev_min = prev[j].min(curr[j - 1]).min(prev[j - 1]);
             curr[j] = dist.max(prev_min);
         }
@@ -480,14 +480,8 @@ mod tests {
 
     #[test]
     fn test_frechet_approx() {
-        let p = vec![
-            Point2::new(0.0, 0.0),
-            Point2::new(2.0, 0.0),
-        ];
-        let q = vec![
-            Point2::new(0.0, 1.0),
-            Point2::new(2.0, 1.0),
-        ];
+        let p = vec![Point2::new(0.0, 0.0), Point2::new(2.0, 0.0)];
+        let q = vec![Point2::new(0.0, 1.0), Point2::new(2.0, 1.0)];
 
         // Discrete only checks endpoints
         let discrete = discrete_frechet_distance(&p, &q);
@@ -520,14 +514,8 @@ mod tests {
     #[test]
     fn test_frechet_at_most_requires_ordering() {
         // These paths cross - Fréchet must respect ordering
-        let p = vec![
-            Point2::new(0.0, 0.0),
-            Point2::new(2.0, 2.0),
-        ];
-        let q = vec![
-            Point2::new(0.0, 2.0),
-            Point2::new(2.0, 0.0),
-        ];
+        let p = vec![Point2::new(0.0, 0.0), Point2::new(2.0, 2.0)];
+        let q = vec![Point2::new(0.0, 2.0), Point2::new(2.0, 0.0)];
 
         // Starting points are 2.0 apart, ending points are 2.0 apart
         // Fréchet distance is 2.0
@@ -557,14 +545,8 @@ mod tests {
 
     #[test]
     fn test_f32() {
-        let p: Vec<Point2<f32>> = vec![
-            Point2::new(0.0, 0.0),
-            Point2::new(1.0, 0.0),
-        ];
-        let q: Vec<Point2<f32>> = vec![
-            Point2::new(0.0, 1.0),
-            Point2::new(1.0, 1.0),
-        ];
+        let p: Vec<Point2<f32>> = vec![Point2::new(0.0, 0.0), Point2::new(1.0, 0.0)];
+        let q: Vec<Point2<f32>> = vec![Point2::new(0.0, 1.0), Point2::new(1.0, 1.0)];
 
         let dist = discrete_frechet_distance(&p, &q);
         assert!((dist - 1.0).abs() < 0.001);
@@ -572,10 +554,7 @@ mod tests {
 
     #[test]
     fn test_sample_polyline() {
-        let polyline = vec![
-            Point2::new(0.0, 0.0),
-            Point2::new(2.0, 0.0),
-        ];
+        let polyline = vec![Point2::new(0.0, 0.0), Point2::new(2.0, 0.0)];
 
         let sampled = sample_polyline(&polyline, 4);
 
@@ -595,10 +574,7 @@ mod tests {
             Point2::new(1.0, 1.0),
             Point2::new(2.0, 0.0),
         ];
-        let q = vec![
-            Point2::new(0.0, 0.5),
-            Point2::new(2.0, 0.5),
-        ];
+        let q = vec![Point2::new(0.0, 0.5), Point2::new(2.0, 0.5)];
 
         let dist_pq = discrete_frechet_distance(&p, &q);
         let dist_qp = discrete_frechet_distance(&q, &p);

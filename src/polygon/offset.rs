@@ -184,7 +184,10 @@ fn miter_corner<F: Float>(
 
     if bisector_len < F::epsilon() {
         // Edges are parallel - just offset perpendicular
-        return Some(Point2::new(curr.x + n1.x * distance, curr.y + n1.y * distance));
+        return Some(Point2::new(
+            curr.x + n1.x * distance,
+            curr.y + n1.y * distance,
+        ));
     }
 
     // Normalized bisector
@@ -197,7 +200,10 @@ fn miter_corner<F: Float>(
     let sin_half = (n1.x * by - n1.y * bx).abs();
 
     if sin_half < F::epsilon() {
-        return Some(Point2::new(curr.x + n1.x * distance, curr.y + n1.y * distance));
+        return Some(Point2::new(
+            curr.x + n1.x * distance,
+            curr.y + n1.y * distance,
+        ));
     }
 
     let miter_length = distance / sin_half;
@@ -207,7 +213,10 @@ fn miter_corner<F: Float>(
         return None; // Exceeded limit, use bevel instead
     }
 
-    Some(Point2::new(curr.x + bx * miter_length, curr.y + by * miter_length))
+    Some(Point2::new(
+        curr.x + bx * miter_length,
+        curr.y + by * miter_length,
+    ))
 }
 
 /// Adds a rounded corner as a series of arc points.
@@ -242,7 +251,9 @@ fn add_round_corner<F: Float>(
 
     // Number of segments for the arc (based on sweep angle)
     let abs_sweep = sweep.abs();
-    let segments = (abs_sweep * F::from(8.0 / PI).unwrap()).ceil().max(F::one());
+    let segments = (abs_sweep * F::from(8.0 / PI).unwrap())
+        .ceil()
+        .max(F::one());
     let segments_usize = segments.to_usize().unwrap_or(8).min(32);
 
     if segments_usize <= 1 {

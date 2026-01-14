@@ -109,8 +109,7 @@ impl<F: Float> Skeleton<F> {
             // Find edges to remove
             let mut to_remove = Vec::new();
             for (i, edge) in self.edges.iter().enumerate() {
-                let is_leaf_edge =
-                    degrees[edge.start] == 1 || degrees[edge.end] == 1;
+                let is_leaf_edge = degrees[edge.start] == 1 || degrees[edge.end] == 1;
 
                 if is_leaf_edge {
                     let p1 = self.nodes[edge.start].point;
@@ -226,7 +225,11 @@ fn sample_boundary<F: Float>(vertices: &[Point2<F>], sample_distance: F) -> Vec<
         let p2 = vertices[(i + 1) % n];
 
         let edge_len = p1.distance(p2);
-        let num_samples = (edge_len / sample_distance).ceil().to_usize().unwrap().max(1);
+        let num_samples = (edge_len / sample_distance)
+            .ceil()
+            .to_usize()
+            .unwrap()
+            .max(1);
 
         for j in 0..num_samples {
             let t = F::from(j).unwrap() / F::from(num_samples).unwrap();
@@ -252,7 +255,8 @@ fn compute_voronoi<F: Float>(points: &[Point2<F>]) -> Skeleton<F> {
     let triangles = delaunay_triangulation(points);
 
     let mut skeleton = Skeleton::new();
-    let mut node_map: std::collections::HashMap<(i64, i64), usize> = std::collections::HashMap::new();
+    let mut node_map: std::collections::HashMap<(i64, i64), usize> =
+        std::collections::HashMap::new();
 
     let scale = F::from(1e6).unwrap();
 
@@ -271,8 +275,8 @@ fn compute_voronoi<F: Float>(points: &[Point2<F>]) -> Skeleton<F> {
             (center.y * scale).to_i64().unwrap_or(0),
         );
 
-        if !node_map.contains_key(&key) {
-            node_map.insert(key, skeleton.nodes.len());
+        if let std::collections::hash_map::Entry::Vacant(e) = node_map.entry(key) {
+            e.insert(skeleton.nodes.len());
             skeleton.nodes.push(SkeletonNode {
                 point: center,
                 radius,
@@ -319,7 +323,10 @@ fn compute_voronoi<F: Float>(points: &[Point2<F>]) -> Skeleton<F> {
 }
 
 /// Checks if two triangles share an edge.
-fn triangles_share_edge(t1: &crate::triangulation::Triangle, t2: &crate::triangulation::Triangle) -> bool {
+fn triangles_share_edge(
+    t1: &crate::triangulation::Triangle,
+    t2: &crate::triangulation::Triangle,
+) -> bool {
     let v1 = [t1.a, t1.b, t1.c];
     let v2 = [t2.a, t2.b, t2.c];
 
@@ -335,7 +342,10 @@ fn triangles_share_edge(t1: &crate::triangulation::Triangle, t2: &crate::triangu
 }
 
 /// Filters Voronoi diagram to keep only parts inside the polygon.
-fn filter_voronoi_to_medial_axis<F: Float>(voronoi: Skeleton<F>, polygon: &Polygon<F>) -> Skeleton<F> {
+fn filter_voronoi_to_medial_axis<F: Float>(
+    voronoi: Skeleton<F>,
+    polygon: &Polygon<F>,
+) -> Skeleton<F> {
     let mut result = Skeleton::new();
     let mut node_remap: Vec<Option<usize>> = vec![None; voronoi.nodes.len()];
 
@@ -351,7 +361,7 @@ fn filter_voronoi_to_medial_axis<F: Float>(voronoi: Skeleton<F>, polygon: &Polyg
                 node_remap[i] = Some(result.nodes.len());
                 result.nodes.push(SkeletonNode {
                     point: node.point,
-                    radius: dist,  // Use actual distance, not circumradius
+                    radius: dist, // Use actual distance, not circumradius
                 });
             }
         }
@@ -374,9 +384,19 @@ fn filter_voronoi_to_medial_axis<F: Float>(voronoi: Skeleton<F>, polygon: &Polyg
 fn compute_min_medial_radius<F: Float>(polygon: &Polygon<F>) -> F {
     // Use 10% of the minimum bounding box dimension
     let (min_x, max_x, min_y, max_y) = polygon.vertices.iter().fold(
-        (F::infinity(), F::neg_infinity(), F::infinity(), F::neg_infinity()),
+        (
+            F::infinity(),
+            F::neg_infinity(),
+            F::infinity(),
+            F::neg_infinity(),
+        ),
         |(min_x, max_x, min_y, max_y), p| {
-            (min_x.min(p.x), max_x.max(p.x), min_y.min(p.y), max_y.max(p.y))
+            (
+                min_x.min(p.x),
+                max_x.max(p.x),
+                min_y.min(p.y),
+                max_y.max(p.y),
+            )
         },
     );
     let width = max_x - min_x;
@@ -489,8 +509,14 @@ fn wavefront_skeleton<F: Float>(vertices: &[Point2<F>], step_size: F) -> Skeleto
             // Connect to the original corner nodes
             let idx1 = vertex_node_idx[collapse_i];
             let idx2 = vertex_node_idx[next_i];
-            skeleton.edges.push(SkeletonEdge { start: idx1, end: new_node_idx });
-            skeleton.edges.push(SkeletonEdge { start: idx2, end: new_node_idx });
+            skeleton.edges.push(SkeletonEdge {
+                start: idx1,
+                end: new_node_idx,
+            });
+            skeleton.edges.push(SkeletonEdge {
+                start: idx2,
+                end: new_node_idx,
+            });
 
             // Remove one vertex and update tracking
             new_positions.remove(next_i);
@@ -514,7 +540,10 @@ fn wavefront_skeleton<F: Float>(vertices: &[Point2<F>], step_size: F) -> Skeleto
 
                 // Connect remaining vertices to center
                 for &idx in &vertex_node_idx {
-                    skeleton.edges.push(SkeletonEdge { start: idx, end: final_idx });
+                    skeleton.edges.push(SkeletonEdge {
+                        start: idx,
+                        end: final_idx,
+                    });
                 }
             }
             break;
@@ -532,14 +561,16 @@ fn wavefront_skeleton<F: Float>(vertices: &[Point2<F>], step_size: F) -> Skeleto
             radius: total_offset,
         });
         for &idx in &vertex_node_idx {
-            skeleton.edges.push(SkeletonEdge { start: idx, end: final_idx });
+            skeleton.edges.push(SkeletonEdge {
+                start: idx,
+                end: final_idx,
+            });
         }
     }
 
     // Clean up duplicate edges
     skeleton.edges.sort_by(|a, b| {
-        (a.start.min(a.end), a.start.max(a.end))
-            .cmp(&(b.start.min(b.end), b.start.max(b.end)))
+        (a.start.min(a.end), a.start.max(a.end)).cmp(&(b.start.min(b.end), b.start.max(b.end)))
     });
     skeleton.edges.dedup_by(|a, b| {
         (a.start.min(a.end), a.start.max(a.end)) == (b.start.min(b.end), b.start.max(b.end))
@@ -671,8 +702,10 @@ mod tests {
         for node in &axis.nodes {
             // All nodes should be inside polygon
             assert!(
-                node.point.x > 0.0 && node.point.x < 4.0 &&
-                node.point.y > 0.0 && node.point.y < 2.0,
+                node.point.x > 0.0
+                    && node.point.x < 4.0
+                    && node.point.y > 0.0
+                    && node.point.y < 2.0,
                 "Node {:?} is outside polygon",
                 node.point
             );
@@ -703,12 +736,16 @@ mod tests {
         assert!(!skeleton.nodes.is_empty());
 
         // Should have more nodes than just the 4 corners
-        assert!(skeleton.nodes.len() > 4, "Should have interior skeleton nodes");
+        assert!(
+            skeleton.nodes.len() > 4,
+            "Should have interior skeleton nodes"
+        );
 
         // Should converge to center (with tolerance for approximate algorithm)
-        let has_center_node = skeleton.nodes.iter().any(|n| {
-            (n.point.x - 1.0).abs() < 0.5 && (n.point.y - 1.0).abs() < 0.5
-        });
+        let has_center_node = skeleton
+            .nodes
+            .iter()
+            .any(|n| (n.point.x - 1.0).abs() < 0.5 && (n.point.y - 1.0).abs() < 0.5);
         assert!(has_center_node, "Should have node near center");
     }
 

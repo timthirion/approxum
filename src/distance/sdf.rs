@@ -171,8 +171,10 @@ impl<F: Float> SdfGrid<F> {
 
         for y in 0..self.height {
             for x in 0..self.width {
-                let world_x = self.origin.x + F::from(x).unwrap() * self.cell_size + half * self.cell_size;
-                let world_y = self.origin.y + F::from(y).unwrap() * self.cell_size + half * self.cell_size;
+                let world_x =
+                    self.origin.x + F::from(x).unwrap() * self.cell_size + half * self.cell_size;
+                let world_y =
+                    self.origin.y + F::from(y).unwrap() * self.cell_size + half * self.cell_size;
                 let p = Point2::new(world_x, world_y);
 
                 self.values[y * self.width + x] = shape.signed_distance(p);

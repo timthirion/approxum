@@ -316,7 +316,7 @@ pub fn sobol_sequence_skip<F: Float>(count: usize, skip: u32) -> Vec<Point2<F>> 
 /// assert_eq!(point.len(), 4);
 /// ```
 pub fn sobol_nd(index: u32, dimensions: usize) -> Vec<f64> {
-    assert!(dimensions >= 1 && dimensions <= 4, "Dimensions must be 1-4");
+    assert!((1..=4).contains(&dimensions), "Dimensions must be 1-4");
 
     let direction_tables = [&DIRECTION_1, &DIRECTION_2, &DIRECTION_3, &DIRECTION_4];
 

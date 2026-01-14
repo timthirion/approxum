@@ -57,10 +57,7 @@ impl<F: Float> QuadraticBezier2<F> {
         );
         let p012 = Point2::new(mt * p01.x + t * p12.x, mt * p01.y + t * p12.y);
 
-        (
-            Self::new(self.p0, p01, p012),
-            Self::new(p012, p12, self.p2),
-        )
+        (Self::new(self.p0, p01, p012), Self::new(p012, p12, self.p2))
     }
 
     /// Returns the maximum distance from the control point to the baseline.

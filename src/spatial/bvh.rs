@@ -239,11 +239,7 @@ impl<F: Float> Bvh<F> {
     ///
     /// Returns the index of the nearest primitive and the squared distance,
     /// or None if the BVH is empty.
-    pub fn nearest<T: Bounded<F>>(
-        &self,
-        primitives: &[T],
-        point: Point2<F>,
-    ) -> Option<(usize, F)> {
+    pub fn nearest<T: Bounded<F>>(&self, primitives: &[T], point: Point2<F>) -> Option<(usize, F)> {
         if self.nodes.is_empty() {
             return None;
         }
@@ -251,7 +247,13 @@ impl<F: Float> Bvh<F> {
         let mut best_idx = 0;
         let mut best_dist_sq = F::infinity();
 
-        self.nearest_recursive(primitives, self.root, point, &mut best_idx, &mut best_dist_sq);
+        self.nearest_recursive(
+            primitives,
+            self.root,
+            point,
+            &mut best_idx,
+            &mut best_dist_sq,
+        );
 
         if best_dist_sq.is_infinite() {
             None
@@ -341,10 +343,8 @@ impl<F: Float> Bvh<F> {
             BvhNode::Leaf { first, count, .. } => {
                 for i in *first..(*first + *count) {
                     let prim_idx = self.indices[i];
-                    if primitives[prim_idx].bounds().intersects(query) {
-                        if !callback(prim_idx) {
-                            return false; // Stop
-                        }
+                    if primitives[prim_idx].bounds().intersects(query) && !callback(prim_idx) {
+                        return false; // Stop
                     }
                 }
                 true
@@ -423,9 +423,9 @@ fn build_recursive<F: Float, T: Bounded<F>>(
 /// Computes the bounding box of a set of primitives.
 fn compute_bounds<F: Float, T: Bounded<F>>(primitives: &[T], indices: &[usize]) -> Aabb2<F> {
     let first_bounds = primitives[indices[0]].bounds();
-    indices[1..]
-        .iter()
-        .fold(first_bounds, |acc, &idx| acc.union(primitives[idx].bounds()))
+    indices[1..].iter().fold(first_bounds, |acc, &idx| {
+        acc.union(primitives[idx].bounds())
+    })
 }
 
 /// Finds the best split using Surface Area Heuristic (SAH).
@@ -444,7 +444,11 @@ fn find_best_split<F: Float, T: Bounded<F>>(
         .iter()
         .map(|&idx| {
             let c = primitives[idx].centroid();
-            if axis == 0 { c.x } else { c.y }
+            if axis == 0 {
+                c.x
+            } else {
+                c.y
+            }
         })
         .collect();
 

@@ -170,7 +170,8 @@ pub fn validate<F: Float>(polygon: &Polygon<F>, tolerance: F) -> ValidationResul
     let self_intersections = find_self_intersections(polygon);
     let has_self_intersections = !self_intersections.is_empty();
 
-    let is_valid = !is_degenerate && !has_zero_area && !has_duplicate_vertices && !has_self_intersections;
+    let is_valid =
+        !is_degenerate && !has_zero_area && !has_duplicate_vertices && !has_self_intersections;
 
     ValidationResult {
         is_valid,
@@ -217,10 +218,7 @@ pub fn is_valid<F: Float>(polygon: &Polygon<F>, tolerance: F) -> bool {
 /// let repaired = repair_self_intersections(&figure8, 1e-9);
 /// assert_eq!(repaired.len(), 2);
 /// ```
-pub fn repair_self_intersections<F: Float>(
-    polygon: &Polygon<F>,
-    tolerance: F,
-) -> Vec<Polygon<F>> {
+pub fn repair_self_intersections<F: Float>(polygon: &Polygon<F>, tolerance: F) -> Vec<Polygon<F>> {
     let intersections = find_self_intersections(polygon);
 
     if intersections.is_empty() {

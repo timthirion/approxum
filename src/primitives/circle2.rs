@@ -332,7 +332,11 @@ mod tests {
         let c: Circle2<f64> = Circle2::new(Point2::origin(), 1.0);
 
         assert_relative_eq!(c.signed_distance(Point2::new(0.0, 0.0)), -1.0);
-        assert_relative_eq!(c.signed_distance(Point2::new(1.0, 0.0)), 0.0, epsilon = 1e-10);
+        assert_relative_eq!(
+            c.signed_distance(Point2::new(1.0, 0.0)),
+            0.0,
+            epsilon = 1e-10
+        );
         assert_relative_eq!(c.signed_distance(Point2::new(2.0, 0.0)), 1.0);
     }
 

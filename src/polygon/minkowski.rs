@@ -38,8 +38,8 @@
 //! // Result is the square with rounded corners
 //! ```
 
-use super::core::{polygon_is_convex, Polygon};
 use super::boolean::polygon_union;
+use super::core::{polygon_is_convex, Polygon};
 use crate::primitives::Point2;
 use num_traits::Float;
 

@@ -43,7 +43,16 @@ impl Svg {
         }
     }
 
-    fn rect(&mut self, x: f64, y: f64, w: f64, h: f64, fill: &str, stroke: &str, stroke_width: f64) {
+    fn rect(
+        &mut self,
+        x: f64,
+        y: f64,
+        w: f64,
+        h: f64,
+        fill: &str,
+        stroke: &str,
+        stroke_width: f64,
+    ) {
         self.content.push_str(&format!(
             r#"<rect x="{}" y="{}" width="{}" height="{}" fill="{}" stroke="{}" stroke-width="{}"/>"#,
             x, y, w, h, fill, stroke, stroke_width
@@ -179,12 +188,18 @@ fn generate_simplification() {
     svg.text(500.0, 30.0, "Visvalingam-Whyatt", 16.0, "#e0e0e0");
 
     // Original (faded) - shift right by 400
-    let original_shifted: Vec<_> = original.iter().map(|p| Point2::new(p.x + 400.0, p.y)).collect();
+    let original_shifted: Vec<_> = original
+        .iter()
+        .map(|p| Point2::new(p.x + 400.0, p.y))
+        .collect();
     svg.polyline(&original_shifted, "#4a4a6a", 1.0, "none");
 
     // Simplified
     let vis_result = visvalingam(&original, 200.0);
-    let vis_shifted: Vec<_> = vis_result.iter().map(|p| Point2::new(p.x + 400.0, p.y)).collect();
+    let vis_shifted: Vec<_> = vis_result
+        .iter()
+        .map(|p| Point2::new(p.x + 400.0, p.y))
+        .collect();
     svg.polyline(&vis_shifted, "#ff6b6b", 2.0, "none");
 
     // Points
@@ -201,7 +216,13 @@ fn generate_simplification() {
     );
 
     // Legend at bottom
-    svg.text(250.0, 390.0, "Original curve (gray) vs Simplified (colored)", 12.0, "#606060");
+    svg.text(
+        250.0,
+        390.0,
+        "Original curve (gray) vs Simplified (colored)",
+        12.0,
+        "#606060",
+    );
 
     svg.save("screenshots/simplification.svg");
     println!("Generated simplification.svg");
@@ -274,7 +295,13 @@ fn generate_curves() {
 
     svg.group_end();
 
-    svg.text(280.0, 380.0, "Control points (yellow) • Endpoints (red)", 12.0, "#606060");
+    svg.text(
+        280.0,
+        380.0,
+        "Control points (yellow) • Endpoints (red)",
+        12.0,
+        "#606060",
+    );
 
     svg.save("screenshots/curves.svg");
     println!("Generated curves.svg");
@@ -308,8 +335,20 @@ fn generate_poisson() {
     svg.line(400.0, 40.0, 400.0, 390.0, "#3a3a5a", 1.0);
 
     // Labels
-    svg.text(120.0, 380.0, &format!("min_distance = 5 ({} points)", points_dense.len()), 12.0, "#808080");
-    svg.text(520.0, 380.0, &format!("min_distance = 10 ({} points)", points_sparse.len()), 12.0, "#808080");
+    svg.text(
+        120.0,
+        380.0,
+        &format!("min_distance = 5 ({} points)", points_dense.len()),
+        12.0,
+        "#808080",
+    );
+    svg.text(
+        520.0,
+        380.0,
+        &format!("min_distance = 10 ({} points)", points_sparse.len()),
+        12.0,
+        "#808080",
+    );
 
     svg.save("screenshots/poisson.svg");
     println!("Generated poisson.svg");
@@ -435,7 +474,13 @@ fn generate_bvh() {
     svg.rect(320.0, 365.0, 15.0, 15.0, "#00d4ff40", "#00d4ff", 1.0);
     svg.text(340.0, 377.0, "Leaf AABBs", 11.0, "#808080");
 
-    svg.text(500.0, 377.0, "Spatial partitioning enables O(log n) queries", 11.0, "#606060");
+    svg.text(
+        500.0,
+        377.0,
+        "Spatial partitioning enables O(log n) queries",
+        11.0,
+        "#606060",
+    );
 
     svg.save("screenshots/bvh.svg");
     println!("Generated bvh.svg");
@@ -456,7 +501,10 @@ fn generate_sdf() {
     for i in 0..(points_count * 2) {
         let angle = (i as f64) * PI / points_count as f64 - PI / 2.0;
         let r = if i % 2 == 0 { outer_r } else { inner_r };
-        star_points.push(Point2::new(center.x + r * angle.cos(), center.y + r * angle.sin()));
+        star_points.push(Point2::new(
+            center.x + r * angle.cos(),
+            center.y + r * angle.sin(),
+        ));
     }
 
     // Draw SDF as colored grid

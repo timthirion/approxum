@@ -2,8 +2,8 @@
 //!
 //! Fits Bézier curves to point data using least-squares optimization.
 
-use crate::primitives::Point2;
 use crate::curves::CubicBezier2;
+use crate::primitives::Point2;
 use num_traits::Float;
 
 /// Result of a curve fitting operation.
@@ -162,8 +162,8 @@ fn chord_length_parameterize<F: Float>(points: &[Point2<F>]) -> Vec<F> {
 
     // Normalize to [0, 1]
     if total > F::epsilon() {
-        for i in 1..n {
-            params[i] = params[i] / total;
+        for param in params.iter_mut().take(n).skip(1) {
+            *param = *param / total;
         }
     }
 
@@ -181,12 +181,7 @@ fn fit_cubic_internal<F: Float>(points: &[Point2<F>], params: &[F]) -> CubicBezi
 
     if n == 2 {
         let third = F::one() / (F::one() + F::one() + F::one());
-        return CubicBezier2::new(
-            p0,
-            p0.lerp(p3, third),
-            p0.lerp(p3, third + third),
-            p3,
-        );
+        return CubicBezier2::new(p0, p0.lerp(p3, third), p0.lerp(p3, third + third), p3);
     }
 
     let one = F::one();
@@ -214,10 +209,10 @@ fn fit_cubic_internal<F: Float>(points: &[Point2<F>], params: &[F]) -> CubicBezi
         let t = params[i];
         let mt = one - t;
 
-        let a1 = three * mt * mt * t;      // 3(1-t)²t
-        let a2 = three * mt * t * t;       // 3(1-t)t²
-        let b0 = mt * mt * mt;             // (1-t)³
-        let b3 = t * t * t;                // t³
+        let a1 = three * mt * mt * t; // 3(1-t)²t
+        let a2 = three * mt * t * t; // 3(1-t)t²
+        let b0 = mt * mt * mt; // (1-t)³
+        let b3 = t * t * t; // t³
 
         // RHS = P[i] - b0·P0 - b3·P3
         let rhs_x = points[i].x - b0 * p0.x - b3 * p3.x;
@@ -274,11 +269,7 @@ fn compute_max_error<F: Float>(
 }
 
 /// Reparameterizes points using Newton-Raphson iteration.
-fn reparameterize<F: Float>(
-    points: &[Point2<F>],
-    curve: &CubicBezier2<F>,
-    params: &[F],
-) -> Vec<F> {
+fn reparameterize<F: Float>(points: &[Point2<F>], curve: &CubicBezier2<F>, params: &[F]) -> Vec<F> {
     let mut new_params = params.to_vec();
 
     for (i, (param, point)) in params.iter().zip(points.iter()).enumerate() {
@@ -294,11 +285,7 @@ fn reparameterize<F: Float>(
 }
 
 /// Uses Newton-Raphson to find a better parameter value for a point.
-fn newton_raphson_root<F: Float>(
-    point: Point2<F>,
-    curve: &CubicBezier2<F>,
-    initial_t: F,
-) -> F {
+fn newton_raphson_root<F: Float>(point: Point2<F>, curve: &CubicBezier2<F>, initial_t: F) -> F {
     let mut t = initial_t;
     let one = F::one();
 
@@ -314,8 +301,10 @@ fn newton_raphson_root<F: Float>(
         let diff_y = q.y - point.y;
 
         let numerator = diff_x * q_prime.x + diff_y * q_prime.y;
-        let denominator = q_prime.x * q_prime.x + q_prime.y * q_prime.y
-            + diff_x * q_prime2.x + diff_y * q_prime2.y;
+        let denominator = q_prime.x * q_prime.x
+            + q_prime.y * q_prime.y
+            + diff_x * q_prime2.x
+            + diff_y * q_prime2.y;
 
         if denominator.abs() <= F::epsilon() {
             break;
@@ -378,10 +367,7 @@ mod tests {
 
     #[test]
     fn test_fit_cubic_two_points() {
-        let points = vec![
-            Point2::new(0.0, 0.0),
-            Point2::new(4.0, 0.0),
-        ];
+        let points = vec![Point2::new(0.0, 0.0), Point2::new(4.0, 0.0)];
 
         let result: FitResult<f64> = fit_cubic(&points).unwrap();
 
@@ -420,9 +406,7 @@ mod tests {
             Point2::new(4.0, 0.0),
         );
 
-        let points: Vec<Point2<f64>> = (0..=10)
-            .map(|i| original.eval(i as f64 / 10.0))
-            .collect();
+        let points: Vec<Point2<f64>> = (0..=10).map(|i| original.eval(i as f64 / 10.0)).collect();
 
         let result = fit_cubic(&points).unwrap();
 
@@ -442,9 +426,7 @@ mod tests {
             Point2::new(4.0, 0.0),
         );
 
-        let points: Vec<Point2<f64>> = (0..=20)
-            .map(|i| original.eval(i as f64 / 20.0))
-            .collect();
+        let points: Vec<Point2<f64>> = (0..=20).map(|i| original.eval(i as f64 / 20.0)).collect();
 
         let result = fit_cubic_iterative(&points, 0.001, 10).unwrap();
 

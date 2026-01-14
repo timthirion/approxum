@@ -114,16 +114,8 @@ impl KdTree {
 
         // Sort indices by the current axis
         indices.sort_by(|&a, &b| {
-            let val_a = if axis == 0 {
-                points[a].x
-            } else {
-                points[a].y
-            };
-            let val_b = if axis == 0 {
-                points[b].x
-            } else {
-                points[b].y
-            };
+            let val_a = if axis == 0 { points[a].x } else { points[a].y };
+            let val_b = if axis == 0 { points[b].x } else { points[b].y };
             val_a.partial_cmp(&val_b).unwrap_or(Ordering::Equal)
         });
 
@@ -310,11 +302,8 @@ impl KdTree {
 
                 // Check if other side could contain closer points
                 let axis_dist = (query_val - point_val).abs();
-                let should_search = heap.len() < k
-                    || heap
-                        .peek()
-                        .map(|e| axis_dist < e.dist)
-                        .unwrap_or(true);
+                let should_search =
+                    heap.len() < k || heap.peek().map(|e| axis_dist < e.dist).unwrap_or(true);
 
                 if should_search {
                     if let Some(child) = second {
@@ -414,6 +403,7 @@ impl KdTree {
     }
 
     /// Recursive AABB range search.
+    #[allow(clippy::only_used_in_recursion)]
     fn aabb_recursive<F: Float>(
         points: &[Point2<F>],
         node: &KdNode,
@@ -501,15 +491,17 @@ impl<F: Float> PartialEq for HeapEntry<F> {
 
 impl<F: Float> Eq for HeapEntry<F> {}
 
-impl<F: Float> PartialOrd for HeapEntry<F> {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.dist.partial_cmp(&other.dist)
+impl<F: Float> Ord for HeapEntry<F> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.dist
+            .partial_cmp(&other.dist)
+            .unwrap_or(Ordering::Equal)
     }
 }
 
-impl<F: Float> Ord for HeapEntry<F> {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap_or(Ordering::Equal)
+impl<F: Float> PartialOrd for HeapEntry<F> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 

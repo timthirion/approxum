@@ -424,9 +424,8 @@ pub fn remove_degenerate_edges<F: Float>(points: &[Point2<F>], epsilon: F) -> Ve
     result.push(points[0]);
 
     // Process middle points
-    for i in 1..points.len() - 1 {
+    for curr in points.iter().take(points.len() - 1).skip(1) {
         let prev = result.last().unwrap();
-        let curr = &points[i];
 
         // Check if edge from prev to curr is non-degenerate
         let dx = curr.x - prev.x;
@@ -808,7 +807,7 @@ mod tests {
     fn test_snap_and_weld() {
         let points = vec![
             Point2::new(0.1, 0.1),
-            Point2::new(0.2, 0.2),  // Both snap to (0, 0)
+            Point2::new(0.2, 0.2), // Both snap to (0, 0)
             Point2::new(1.0, 1.0),
         ];
 
@@ -881,10 +880,7 @@ mod tests {
 
     #[test]
     fn test_remove_degenerate_edges_preserves_endpoints() {
-        let points = vec![
-            Point2::new(0.0, 0.0),
-            Point2::new(1.0, 0.0),
-        ];
+        let points = vec![Point2::new(0.0, 0.0), Point2::new(1.0, 0.0)];
 
         let cleaned = remove_degenerate_edges(&points, 0.01);
         assert_eq!(cleaned.len(), 2);

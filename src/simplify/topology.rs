@@ -42,11 +42,7 @@ use std::collections::BinaryHeap;
 /// let simplified = topology_preserving(&points, 0.1, 1e-10);
 /// // Result is guaranteed not to self-intersect
 /// ```
-pub fn topology_preserving<F: Float>(
-    points: &[Point2<F>],
-    min_area: F,
-    eps: F,
-) -> Vec<Point2<F>> {
+pub fn topology_preserving<F: Float>(points: &[Point2<F>], min_area: F, eps: F) -> Vec<Point2<F>> {
     let indices = topology_preserving_indices(points, min_area, eps);
     indices.into_iter().map(|i| points[i]).collect()
 }
@@ -106,7 +102,10 @@ impl<F: Float> PartialOrd for AreaEntry<F> {
 impl<F: Float> Ord for AreaEntry<F> {
     fn cmp(&self, other: &Self) -> Ordering {
         // Reverse ordering for min-heap
-        other.area.partial_cmp(&self.area).unwrap_or(Ordering::Equal)
+        other
+            .area
+            .partial_cmp(&self.area)
+            .unwrap_or(Ordering::Equal)
     }
 }
 
@@ -441,11 +440,11 @@ mod tests {
         // Start -> up-right -> down -> up-left -> back
         // If we remove the middle point, the line would cross
         let points: Vec<Point2<f64>> = vec![
-            Point2::new(0.0, 0.0),   // 0
-            Point2::new(5.0, 5.0),   // 1
-            Point2::new(10.0, 0.0),  // 2
-            Point2::new(5.0, -1.0),  // 3 - small deviation, might be removed
-            Point2::new(0.0, 0.0),   // 4 - back to start (closed)
+            Point2::new(0.0, 0.0),  // 0
+            Point2::new(5.0, 5.0),  // 1
+            Point2::new(10.0, 0.0), // 2
+            Point2::new(5.0, -1.0), // 3 - small deviation, might be removed
+            Point2::new(0.0, 0.0),  // 4 - back to start (closed)
         ];
 
         // With regular Visvalingam, point 3 might be removed, causing

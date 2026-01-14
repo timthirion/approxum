@@ -82,7 +82,8 @@ pub fn visibility_polygon_with_obstacles<F: Float>(
         }
     }
 
-    let obstacle_verts: Vec<&[Point2<F>]> = obstacles.iter().map(|o| o.vertices.as_slice()).collect();
+    let obstacle_verts: Vec<&[Point2<F>]> =
+        obstacles.iter().map(|o| o.vertices.as_slice()).collect();
     compute_visibility(&boundary.vertices, &obstacle_verts, viewpoint)
 }
 
@@ -133,8 +134,12 @@ fn compute_visibility<F: Float>(
 
         // Cast three rays: to the vertex and slightly to each side
         rays.push(RayInfo { angle });
-        rays.push(RayInfo { angle: angle - epsilon });
-        rays.push(RayInfo { angle: angle + epsilon });
+        rays.push(RayInfo {
+            angle: angle - epsilon,
+        });
+        rays.push(RayInfo {
+            angle: angle + epsilon,
+        });
     }
 
     // Sort rays by angle
@@ -470,7 +475,12 @@ mod tests {
         let viewpoint = Point2::new(2.0, 5.0);
         let target = Point2::new(8.0, 5.0); // On other side of wall
 
-        assert!(!is_visible_with_obstacles(&room, &[obstacle], viewpoint, target));
+        assert!(!is_visible_with_obstacles(
+            &room,
+            &[obstacle],
+            viewpoint,
+            target
+        ));
     }
 
     #[test]
@@ -486,7 +496,12 @@ mod tests {
         let viewpoint = Point2::new(2.0, 2.0);
         let target = Point2::new(2.0, 8.0); // Not blocked by obstacle
 
-        assert!(is_visible_with_obstacles(&room, &[obstacle], viewpoint, target));
+        assert!(is_visible_with_obstacles(
+            &room,
+            &[obstacle],
+            viewpoint,
+            target
+        ));
     }
 
     #[test]

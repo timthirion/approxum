@@ -255,10 +255,7 @@ fn general_intersection<F: Float>(a: &Polygon<F>, b: &Polygon<F>) -> Vec<Polygon
 }
 
 /// Find all intersection points between two polygons.
-fn find_all_intersections<F: Float>(
-    a: &Polygon<F>,
-    b: &Polygon<F>,
-) -> Vec<IntersectionPoint<F>> {
+fn find_all_intersections<F: Float>(a: &Polygon<F>, b: &Polygon<F>) -> Vec<IntersectionPoint<F>> {
     let mut intersections = Vec::new();
 
     let n_a = a.vertices.len();
@@ -341,15 +338,23 @@ fn build_intersection_polygon<F: Float>(
     }
 
     // Order vertices by angle around centroid
-    let cx: F = result_vertices.iter().map(|p| p.x).fold(F::zero(), |a, b| a + b)
+    let cx: F = result_vertices
+        .iter()
+        .map(|p| p.x)
+        .fold(F::zero(), |a, b| a + b)
         / F::from(result_vertices.len()).unwrap();
-    let cy: F = result_vertices.iter().map(|p| p.y).fold(F::zero(), |a, b| a + b)
+    let cy: F = result_vertices
+        .iter()
+        .map(|p| p.y)
+        .fold(F::zero(), |a, b| a + b)
         / F::from(result_vertices.len()).unwrap();
 
     result_vertices.sort_by(|p1, p2| {
         let angle1 = (p1.y - cy).atan2(p1.x - cx);
         let angle2 = (p2.y - cy).atan2(p2.x - cx);
-        angle1.partial_cmp(&angle2).unwrap_or(std::cmp::Ordering::Equal)
+        angle1
+            .partial_cmp(&angle2)
+            .unwrap_or(std::cmp::Ordering::Equal)
     });
 
     // Remove near-duplicate points
@@ -443,15 +448,23 @@ fn build_union_polygon<F: Float>(
     }
 
     // Order vertices by angle around centroid
-    let cx: F = result_vertices.iter().map(|p| p.x).fold(F::zero(), |a, b| a + b)
+    let cx: F = result_vertices
+        .iter()
+        .map(|p| p.x)
+        .fold(F::zero(), |a, b| a + b)
         / F::from(result_vertices.len()).unwrap();
-    let cy: F = result_vertices.iter().map(|p| p.y).fold(F::zero(), |a, b| a + b)
+    let cy: F = result_vertices
+        .iter()
+        .map(|p| p.y)
+        .fold(F::zero(), |a, b| a + b)
         / F::from(result_vertices.len()).unwrap();
 
     result_vertices.sort_by(|p1, p2| {
         let angle1 = (p1.y - cy).atan2(p1.x - cx);
         let angle2 = (p2.y - cy).atan2(p2.x - cx);
-        angle1.partial_cmp(&angle2).unwrap_or(std::cmp::Ordering::Equal)
+        angle1
+            .partial_cmp(&angle2)
+            .unwrap_or(std::cmp::Ordering::Equal)
     });
 
     // Remove duplicates
@@ -527,15 +540,23 @@ fn build_difference_polygon<F: Float>(
     }
 
     // Order vertices by angle around centroid
-    let cx: F = result_vertices.iter().map(|p| p.x).fold(F::zero(), |a, b| a + b)
+    let cx: F = result_vertices
+        .iter()
+        .map(|p| p.x)
+        .fold(F::zero(), |a, b| a + b)
         / F::from(result_vertices.len()).unwrap();
-    let cy: F = result_vertices.iter().map(|p| p.y).fold(F::zero(), |a, b| a + b)
+    let cy: F = result_vertices
+        .iter()
+        .map(|p| p.y)
+        .fold(F::zero(), |a, b| a + b)
         / F::from(result_vertices.len()).unwrap();
 
     result_vertices.sort_by(|p1, p2| {
         let angle1 = (p1.y - cy).atan2(p1.x - cx);
         let angle2 = (p2.y - cy).atan2(p2.x - cx);
-        angle1.partial_cmp(&angle2).unwrap_or(std::cmp::Ordering::Equal)
+        angle1
+            .partial_cmp(&angle2)
+            .unwrap_or(std::cmp::Ordering::Equal)
     });
 
     // Remove duplicates

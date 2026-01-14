@@ -41,7 +41,9 @@ use crate::primitives::Point2;
 use num_traits::Float;
 
 /// First 20 prime numbers for higher-dimensional Halton sequences.
-const PRIMES: [u32; 20] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71];
+const PRIMES: [u32; 20] = [
+    2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
+];
 
 /// Computes the radical inverse of `n` in the given `base`.
 ///
@@ -254,7 +256,10 @@ pub fn halton_sequence_skip<F: Float>(count: usize, skip: u32) -> Vec<Point2<F>>
 /// assert_eq!(point.len(), 4);
 /// ```
 pub fn halton_nd(index: u32, dimensions: usize) -> Vec<f64> {
-    assert!(dimensions <= PRIMES.len(), "Maximum 20 dimensions supported");
+    assert!(
+        dimensions <= PRIMES.len(),
+        "Maximum 20 dimensions supported"
+    );
 
     PRIMES[..dimensions]
         .iter()

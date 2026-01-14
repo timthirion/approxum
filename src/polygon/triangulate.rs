@@ -182,7 +182,9 @@ pub fn triangulate_polygon_indexed<F: Float>(polygon: &Polygon<F>) -> Triangulat
     let n = polygon.len();
 
     if n < 3 {
-        return TriangulationResult { indices: Vec::new() };
+        return TriangulationResult {
+            indices: Vec::new(),
+        };
     }
 
     if n == 3 {
@@ -260,12 +262,11 @@ fn is_ear<F: Float>(vertices: &[Point2<F>], prev: usize, curr: usize, next: usiz
     }
 
     // Check that no other vertices are inside this triangle
-    let n = vertices.len();
-    for i in 0..n {
+    for (i, &vertex) in vertices.iter().enumerate() {
         if i == prev || i == curr || i == next {
             continue;
         }
-        if point_in_triangle(vertices[i], a, b, c) {
+        if point_in_triangle(vertex, a, b, c) {
             return false;
         }
     }
@@ -307,7 +308,10 @@ fn sign<F: Float>(p1: Point2<F>, p2: Point2<F>, p3: Point2<F>) -> F {
 ///
 /// Useful for verifying that the triangulation covers the original polygon.
 pub fn triangulation_area<F: Float>(triangles: &[PolygonTriangle<F>]) -> F {
-    triangles.iter().map(|t| t.area()).fold(F::zero(), |a, b| a + b)
+    triangles
+        .iter()
+        .map(|t| t.area())
+        .fold(F::zero(), |a, b| a + b)
 }
 
 #[cfg(test)]
@@ -407,16 +411,16 @@ mod tests {
     fn test_triangulate_star() {
         // Simple star shape (concave)
         let star = Polygon::new(vec![
-            Point2::new(0.0_f64, 3.0),   // Top
-            Point2::new(1.0, 1.0),        // Inner
-            Point2::new(3.0, 1.0),        // Right
-            Point2::new(1.5, 0.0),        // Inner
-            Point2::new(2.0, -2.0),       // Bottom right
-            Point2::new(0.0, -0.5),       // Inner
-            Point2::new(-2.0, -2.0),      // Bottom left
-            Point2::new(-1.5, 0.0),       // Inner
-            Point2::new(-3.0, 1.0),       // Left
-            Point2::new(-1.0, 1.0),       // Inner
+            Point2::new(0.0_f64, 3.0), // Top
+            Point2::new(1.0, 1.0),     // Inner
+            Point2::new(3.0, 1.0),     // Right
+            Point2::new(1.5, 0.0),     // Inner
+            Point2::new(2.0, -2.0),    // Bottom right
+            Point2::new(0.0, -0.5),    // Inner
+            Point2::new(-2.0, -2.0),   // Bottom left
+            Point2::new(-1.5, 0.0),    // Inner
+            Point2::new(-3.0, 1.0),    // Left
+            Point2::new(-1.0, 1.0),    // Inner
         ]);
 
         let result = triangulate_polygon(&star);
@@ -452,10 +456,7 @@ mod tests {
 
     #[test]
     fn test_triangulate_two_vertices() {
-        let line = Polygon::new(vec![
-            Point2::new(0.0_f64, 0.0),
-            Point2::new(1.0, 0.0),
-        ]);
+        let line = Polygon::new(vec![Point2::new(0.0_f64, 0.0), Point2::new(1.0, 0.0)]);
         let result = triangulate_polygon(&line);
         assert!(result.is_empty());
     }

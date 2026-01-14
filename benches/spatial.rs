@@ -150,7 +150,9 @@ fn bench_distance_transform(c: &mut Criterion) {
             BenchmarkId::new("circle", size),
             &(&grid, size),
             |b, (grid, size)| {
-                b.iter(|| distance_transform::<f64>(black_box(grid), black_box(*size), black_box(*size)))
+                b.iter(|| {
+                    distance_transform::<f64>(black_box(grid), black_box(*size), black_box(*size))
+                })
             },
         );
     }
@@ -208,21 +210,17 @@ fn bench_sdf_grid(c: &mut Criterion) {
     for size in [64, 128, 256] {
         group.throughput(Throughput::Elements((size * size) as u64));
 
-        group.bench_with_input(
-            BenchmarkId::new("generate", size),
-            &size,
-            |b, &size| {
-                b.iter(|| {
-                    SdfGrid::from_shape(
-                        black_box(&circle),
-                        black_box(size),
-                        black_box(size),
-                        black_box(Point2::new(0.0, 0.0)),
-                        black_box(100.0 / size as f64),
-                    )
-                })
-            },
-        );
+        group.bench_with_input(BenchmarkId::new("generate", size), &size, |b, &size| {
+            b.iter(|| {
+                SdfGrid::from_shape(
+                    black_box(&circle),
+                    black_box(size),
+                    black_box(size),
+                    black_box(Point2::new(0.0, 0.0)),
+                    black_box(100.0 / size as f64),
+                )
+            })
+        });
     }
 
     // Grid sampling

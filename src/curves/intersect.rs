@@ -292,12 +292,7 @@ pub fn quadratics_intersect<F: Float>(
     curve2: &QuadraticBezier2<F>,
     tolerance: F,
 ) -> bool {
-    quadratics_intersect_recursive(
-        curve1,
-        curve2,
-        tolerance,
-        0,
-    )
+    quadratics_intersect_recursive(curve1, curve2, tolerance, 0)
 }
 
 /// Checks if two cubic Bézier curves intersect (without computing intersection points).
@@ -308,12 +303,7 @@ pub fn cubics_intersect<F: Float>(
     curve2: &CubicBezier2<F>,
     tolerance: F,
 ) -> bool {
-    cubics_intersect_recursive(
-        curve1,
-        curve2,
-        tolerance,
-        0,
-    )
+    cubics_intersect_recursive(curve1, curve2, tolerance, 0)
 }
 
 /// Self-intersection detection for a cubic Bézier curve.
@@ -380,6 +370,7 @@ pub fn cubic_self_intersection<F: Float>(
 
 const MAX_RECURSION_DEPTH: usize = 50;
 
+#[allow(clippy::too_many_arguments)]
 fn intersect_quadratic_recursive<F: Float>(
     curve1: &QuadraticBezier2<F>,
     t1_min: F,
@@ -429,26 +420,74 @@ fn intersect_quadratic_recursive<F: Float>(
 
         if flat2 {
             intersect_quadratic_recursive(
-                &left1, t1_min, t1_mid, curve2, t2_min, t2_max, tolerance, results, depth + 1,
+                &left1,
+                t1_min,
+                t1_mid,
+                curve2,
+                t2_min,
+                t2_max,
+                tolerance,
+                results,
+                depth + 1,
             );
             intersect_quadratic_recursive(
-                &right1, t1_mid, t1_max, curve2, t2_min, t2_max, tolerance, results, depth + 1,
+                &right1,
+                t1_mid,
+                t1_max,
+                curve2,
+                t2_min,
+                t2_max,
+                tolerance,
+                results,
+                depth + 1,
             );
         } else {
             let (left2, right2) = curve2.split(half);
             let t2_mid = t2_min + half * (t2_max - t2_min);
 
             intersect_quadratic_recursive(
-                &left1, t1_min, t1_mid, &left2, t2_min, t2_mid, tolerance, results, depth + 1,
+                &left1,
+                t1_min,
+                t1_mid,
+                &left2,
+                t2_min,
+                t2_mid,
+                tolerance,
+                results,
+                depth + 1,
             );
             intersect_quadratic_recursive(
-                &left1, t1_min, t1_mid, &right2, t2_mid, t2_max, tolerance, results, depth + 1,
+                &left1,
+                t1_min,
+                t1_mid,
+                &right2,
+                t2_mid,
+                t2_max,
+                tolerance,
+                results,
+                depth + 1,
             );
             intersect_quadratic_recursive(
-                &right1, t1_mid, t1_max, &left2, t2_min, t2_mid, tolerance, results, depth + 1,
+                &right1,
+                t1_mid,
+                t1_max,
+                &left2,
+                t2_min,
+                t2_mid,
+                tolerance,
+                results,
+                depth + 1,
             );
             intersect_quadratic_recursive(
-                &right1, t1_mid, t1_max, &right2, t2_mid, t2_max, tolerance, results, depth + 1,
+                &right1,
+                t1_mid,
+                t1_max,
+                &right2,
+                t2_mid,
+                t2_max,
+                tolerance,
+                results,
+                depth + 1,
             );
         }
     } else {
@@ -457,14 +496,31 @@ fn intersect_quadratic_recursive<F: Float>(
         let t2_mid = t2_min + half * (t2_max - t2_min);
 
         intersect_quadratic_recursive(
-            curve1, t1_min, t1_max, &left2, t2_min, t2_mid, tolerance, results, depth + 1,
+            curve1,
+            t1_min,
+            t1_max,
+            &left2,
+            t2_min,
+            t2_mid,
+            tolerance,
+            results,
+            depth + 1,
         );
         intersect_quadratic_recursive(
-            curve1, t1_min, t1_max, &right2, t2_mid, t2_max, tolerance, results, depth + 1,
+            curve1,
+            t1_min,
+            t1_max,
+            &right2,
+            t2_mid,
+            t2_max,
+            tolerance,
+            results,
+            depth + 1,
         );
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn intersect_cubic_recursive<F: Float>(
     curve1: &CubicBezier2<F>,
     t1_min: F,
@@ -514,26 +570,74 @@ fn intersect_cubic_recursive<F: Float>(
 
         if flat2 {
             intersect_cubic_recursive(
-                &left1, t1_min, t1_mid, curve2, t2_min, t2_max, tolerance, results, depth + 1,
+                &left1,
+                t1_min,
+                t1_mid,
+                curve2,
+                t2_min,
+                t2_max,
+                tolerance,
+                results,
+                depth + 1,
             );
             intersect_cubic_recursive(
-                &right1, t1_mid, t1_max, curve2, t2_min, t2_max, tolerance, results, depth + 1,
+                &right1,
+                t1_mid,
+                t1_max,
+                curve2,
+                t2_min,
+                t2_max,
+                tolerance,
+                results,
+                depth + 1,
             );
         } else {
             let (left2, right2) = curve2.split(half);
             let t2_mid = t2_min + half * (t2_max - t2_min);
 
             intersect_cubic_recursive(
-                &left1, t1_min, t1_mid, &left2, t2_min, t2_mid, tolerance, results, depth + 1,
+                &left1,
+                t1_min,
+                t1_mid,
+                &left2,
+                t2_min,
+                t2_mid,
+                tolerance,
+                results,
+                depth + 1,
             );
             intersect_cubic_recursive(
-                &left1, t1_min, t1_mid, &right2, t2_mid, t2_max, tolerance, results, depth + 1,
+                &left1,
+                t1_min,
+                t1_mid,
+                &right2,
+                t2_mid,
+                t2_max,
+                tolerance,
+                results,
+                depth + 1,
             );
             intersect_cubic_recursive(
-                &right1, t1_mid, t1_max, &left2, t2_min, t2_mid, tolerance, results, depth + 1,
+                &right1,
+                t1_mid,
+                t1_max,
+                &left2,
+                t2_min,
+                t2_mid,
+                tolerance,
+                results,
+                depth + 1,
             );
             intersect_cubic_recursive(
-                &right1, t1_mid, t1_max, &right2, t2_mid, t2_max, tolerance, results, depth + 1,
+                &right1,
+                t1_mid,
+                t1_max,
+                &right2,
+                t2_mid,
+                t2_max,
+                tolerance,
+                results,
+                depth + 1,
             );
         }
     } else {
@@ -541,10 +645,26 @@ fn intersect_cubic_recursive<F: Float>(
         let t2_mid = t2_min + half * (t2_max - t2_min);
 
         intersect_cubic_recursive(
-            curve1, t1_min, t1_max, &left2, t2_min, t2_mid, tolerance, results, depth + 1,
+            curve1,
+            t1_min,
+            t1_max,
+            &left2,
+            t2_min,
+            t2_mid,
+            tolerance,
+            results,
+            depth + 1,
         );
         intersect_cubic_recursive(
-            curve1, t1_min, t1_max, &right2, t2_mid, t2_max, tolerance, results, depth + 1,
+            curve1,
+            t1_min,
+            t1_max,
+            &right2,
+            t2_mid,
+            t2_max,
+            tolerance,
+            results,
+            depth + 1,
         );
     }
 }
@@ -682,7 +802,10 @@ fn segment_segment_intersection<F: Float>(
     }
 }
 
-fn deduplicate_intersections<F: Float>(intersections: &mut Vec<CurveIntersection<F>>, tolerance: F) {
+fn deduplicate_intersections<F: Float>(
+    intersections: &mut Vec<CurveIntersection<F>>,
+    tolerance: F,
+) {
     if intersections.len() <= 1 {
         return;
     }
@@ -693,7 +816,9 @@ fn deduplicate_intersections<F: Float>(intersections: &mut Vec<CurveIntersection
     // Remove duplicates
     let mut write = 0;
     for read in 1..intersections.len() {
-        let dist = intersections[write].point.distance(intersections[read].point);
+        let dist = intersections[write]
+            .point
+            .distance(intersections[read].point);
         if dist > tolerance {
             write += 1;
             intersections[write] = intersections[read];

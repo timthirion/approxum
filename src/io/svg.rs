@@ -612,178 +612,146 @@ impl<'a> SvgPathParser<'a> {
                     commands.push(SvgCommand::LineToRel(Point2::new(x, y)));
                 }
             }
-            'L' => {
-                loop {
-                    let (x, y) = self.parse_coordinate_pair()?;
-                    commands.push(SvgCommand::LineTo(Point2::new(x, y)));
-                    if !self.has_number() {
-                        break;
-                    }
+            'L' => loop {
+                let (x, y) = self.parse_coordinate_pair()?;
+                commands.push(SvgCommand::LineTo(Point2::new(x, y)));
+                if !self.has_number() {
+                    break;
                 }
-            }
-            'l' => {
-                loop {
-                    let (x, y) = self.parse_coordinate_pair()?;
-                    commands.push(SvgCommand::LineToRel(Point2::new(x, y)));
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            'l' => loop {
+                let (x, y) = self.parse_coordinate_pair()?;
+                commands.push(SvgCommand::LineToRel(Point2::new(x, y)));
+                if !self.has_number() {
+                    break;
                 }
-            }
-            'H' => {
-                loop {
-                    let x = self.parse_number()?;
-                    commands.push(SvgCommand::HorizontalTo(x));
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            'H' => loop {
+                let x = self.parse_number()?;
+                commands.push(SvgCommand::HorizontalTo(x));
+                if !self.has_number() {
+                    break;
                 }
-            }
-            'h' => {
-                loop {
-                    let x = self.parse_number()?;
-                    commands.push(SvgCommand::HorizontalToRel(x));
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            'h' => loop {
+                let x = self.parse_number()?;
+                commands.push(SvgCommand::HorizontalToRel(x));
+                if !self.has_number() {
+                    break;
                 }
-            }
-            'V' => {
-                loop {
-                    let y = self.parse_number()?;
-                    commands.push(SvgCommand::VerticalTo(y));
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            'V' => loop {
+                let y = self.parse_number()?;
+                commands.push(SvgCommand::VerticalTo(y));
+                if !self.has_number() {
+                    break;
                 }
-            }
-            'v' => {
-                loop {
-                    let y = self.parse_number()?;
-                    commands.push(SvgCommand::VerticalToRel(y));
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            'v' => loop {
+                let y = self.parse_number()?;
+                commands.push(SvgCommand::VerticalToRel(y));
+                if !self.has_number() {
+                    break;
                 }
-            }
-            'C' => {
-                loop {
-                    let (x1, y1) = self.parse_coordinate_pair()?;
-                    let (x2, y2) = self.parse_coordinate_pair()?;
-                    let (x, y) = self.parse_coordinate_pair()?;
-                    commands.push(SvgCommand::CubicTo(
-                        Point2::new(x1, y1),
-                        Point2::new(x2, y2),
-                        Point2::new(x, y),
-                    ));
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            'C' => loop {
+                let (x1, y1) = self.parse_coordinate_pair()?;
+                let (x2, y2) = self.parse_coordinate_pair()?;
+                let (x, y) = self.parse_coordinate_pair()?;
+                commands.push(SvgCommand::CubicTo(
+                    Point2::new(x1, y1),
+                    Point2::new(x2, y2),
+                    Point2::new(x, y),
+                ));
+                if !self.has_number() {
+                    break;
                 }
-            }
-            'c' => {
-                loop {
-                    let (x1, y1) = self.parse_coordinate_pair()?;
-                    let (x2, y2) = self.parse_coordinate_pair()?;
-                    let (x, y) = self.parse_coordinate_pair()?;
-                    commands.push(SvgCommand::CubicToRel(
-                        Point2::new(x1, y1),
-                        Point2::new(x2, y2),
-                        Point2::new(x, y),
-                    ));
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            'c' => loop {
+                let (x1, y1) = self.parse_coordinate_pair()?;
+                let (x2, y2) = self.parse_coordinate_pair()?;
+                let (x, y) = self.parse_coordinate_pair()?;
+                commands.push(SvgCommand::CubicToRel(
+                    Point2::new(x1, y1),
+                    Point2::new(x2, y2),
+                    Point2::new(x, y),
+                ));
+                if !self.has_number() {
+                    break;
                 }
-            }
-            'S' => {
-                loop {
-                    let (x2, y2) = self.parse_coordinate_pair()?;
-                    let (x, y) = self.parse_coordinate_pair()?;
-                    commands.push(SvgCommand::SmoothCubicTo(
-                        Point2::new(x2, y2),
-                        Point2::new(x, y),
-                    ));
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            'S' => loop {
+                let (x2, y2) = self.parse_coordinate_pair()?;
+                let (x, y) = self.parse_coordinate_pair()?;
+                commands.push(SvgCommand::SmoothCubicTo(
+                    Point2::new(x2, y2),
+                    Point2::new(x, y),
+                ));
+                if !self.has_number() {
+                    break;
                 }
-            }
-            's' => {
-                loop {
-                    let (x2, y2) = self.parse_coordinate_pair()?;
-                    let (x, y) = self.parse_coordinate_pair()?;
-                    commands.push(SvgCommand::SmoothCubicToRel(
-                        Point2::new(x2, y2),
-                        Point2::new(x, y),
-                    ));
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            's' => loop {
+                let (x2, y2) = self.parse_coordinate_pair()?;
+                let (x, y) = self.parse_coordinate_pair()?;
+                commands.push(SvgCommand::SmoothCubicToRel(
+                    Point2::new(x2, y2),
+                    Point2::new(x, y),
+                ));
+                if !self.has_number() {
+                    break;
                 }
-            }
-            'Q' => {
-                loop {
-                    let (x1, y1) = self.parse_coordinate_pair()?;
-                    let (x, y) = self.parse_coordinate_pair()?;
-                    commands.push(SvgCommand::QuadraticTo(
-                        Point2::new(x1, y1),
-                        Point2::new(x, y),
-                    ));
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            'Q' => loop {
+                let (x1, y1) = self.parse_coordinate_pair()?;
+                let (x, y) = self.parse_coordinate_pair()?;
+                commands.push(SvgCommand::QuadraticTo(
+                    Point2::new(x1, y1),
+                    Point2::new(x, y),
+                ));
+                if !self.has_number() {
+                    break;
                 }
-            }
-            'q' => {
-                loop {
-                    let (x1, y1) = self.parse_coordinate_pair()?;
-                    let (x, y) = self.parse_coordinate_pair()?;
-                    commands.push(SvgCommand::QuadraticToRel(
-                        Point2::new(x1, y1),
-                        Point2::new(x, y),
-                    ));
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            'q' => loop {
+                let (x1, y1) = self.parse_coordinate_pair()?;
+                let (x, y) = self.parse_coordinate_pair()?;
+                commands.push(SvgCommand::QuadraticToRel(
+                    Point2::new(x1, y1),
+                    Point2::new(x, y),
+                ));
+                if !self.has_number() {
+                    break;
                 }
-            }
-            'T' => {
-                loop {
-                    let (x, y) = self.parse_coordinate_pair()?;
-                    commands.push(SvgCommand::SmoothQuadraticTo(Point2::new(x, y)));
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            'T' => loop {
+                let (x, y) = self.parse_coordinate_pair()?;
+                commands.push(SvgCommand::SmoothQuadraticTo(Point2::new(x, y)));
+                if !self.has_number() {
+                    break;
                 }
-            }
-            't' => {
-                loop {
-                    let (x, y) = self.parse_coordinate_pair()?;
-                    commands.push(SvgCommand::SmoothQuadraticToRel(Point2::new(x, y)));
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            't' => loop {
+                let (x, y) = self.parse_coordinate_pair()?;
+                commands.push(SvgCommand::SmoothQuadraticToRel(Point2::new(x, y)));
+                if !self.has_number() {
+                    break;
                 }
-            }
-            'A' => {
-                loop {
-                    let arc = self.parse_arc_params(false)?;
-                    commands.push(arc);
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            'A' => loop {
+                let arc = self.parse_arc_params(false)?;
+                commands.push(arc);
+                if !self.has_number() {
+                    break;
                 }
-            }
-            'a' => {
-                loop {
-                    let arc = self.parse_arc_params(true)?;
-                    commands.push(arc);
-                    if !self.has_number() {
-                        break;
-                    }
+            },
+            'a' => loop {
+                let arc = self.parse_arc_params(true)?;
+                commands.push(arc);
+                if !self.has_number() {
+                    break;
                 }
-            }
+            },
             'Z' | 'z' => {
                 commands.push(SvgCommand::ClosePath);
             }
@@ -817,7 +785,11 @@ impl<'a> SvgPathParser<'a> {
     fn parse_number<F: Float + FromStr>(&mut self) -> Result<F, SvgParseError> {
         self.skip_whitespace_and_commas();
 
-        let start = self.chars.peek().map(|&(i, _)| i).unwrap_or(self.input.len());
+        let start = self
+            .chars
+            .peek()
+            .map(|&(i, _)| i)
+            .unwrap_or(self.input.len());
         let mut end = start;
 
         // Optional sign
@@ -935,6 +907,7 @@ impl<'a> SvgPathParser<'a> {
 }
 
 /// Converts an SVG arc to a polyline.
+#[allow(clippy::too_many_arguments)]
 fn arc_to_polyline<F: Float>(
     start: Point2<F>,
     rx: F,
@@ -1035,9 +1008,10 @@ fn arc_to_polyline<F: Float>(
     }
 
     // Generate points
-    let num_segments = ((dtheta.abs() / (tolerance / rx.min(ry)).acos().max(F::from(0.1).unwrap()))
-        .ceil()
-        .max(F::one()))
+    let num_segments = ((dtheta.abs()
+        / (tolerance / rx.min(ry)).acos().max(F::from(0.1).unwrap()))
+    .ceil()
+    .max(F::one()))
     .to_usize()
     .unwrap_or(8)
     .min(360);

@@ -256,7 +256,8 @@ pub fn delaunay_triangulation<F: Float>(points: &[Point2<F>]) -> Vec<Triangle> {
 
         // Find the boundary of the polygonal hole
         // An edge is on the boundary if it's used by exactly one bad triangle
-        let mut edge_count: std::collections::HashMap<Edge, usize> = std::collections::HashMap::new();
+        let mut edge_count: std::collections::HashMap<Edge, usize> =
+            std::collections::HashMap::new();
 
         for &ti in &bad_triangles {
             let tri = triangles[ti];

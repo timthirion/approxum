@@ -499,9 +499,21 @@ mod tests {
     fn test_signed_distance() {
         let line: Line2<f64> = Line2::horizontal(0.0);
 
-        assert_relative_eq!(line.signed_distance(Point2::new(0.0, 5.0)), 5.0, epsilon = 1e-10);
-        assert_relative_eq!(line.signed_distance(Point2::new(0.0, -5.0)), -5.0, epsilon = 1e-10);
-        assert_relative_eq!(line.signed_distance(Point2::new(100.0, 0.0)), 0.0, epsilon = 1e-10);
+        assert_relative_eq!(
+            line.signed_distance(Point2::new(0.0, 5.0)),
+            5.0,
+            epsilon = 1e-10
+        );
+        assert_relative_eq!(
+            line.signed_distance(Point2::new(0.0, -5.0)),
+            -5.0,
+            epsilon = 1e-10
+        );
+        assert_relative_eq!(
+            line.signed_distance(Point2::new(100.0, 0.0)),
+            0.0,
+            epsilon = 1e-10
+        );
     }
 
     #[test]
@@ -709,7 +721,11 @@ mod tests {
 
         // Distance from (1, 0) to y=x should be 1/sqrt(2)
         let expected_dist = 1.0 / 2.0_f64.sqrt();
-        assert_relative_eq!(line.distance(Point2::new(1.0, 0.0)), expected_dist, epsilon = 1e-10);
+        assert_relative_eq!(
+            line.distance(Point2::new(1.0, 0.0)),
+            expected_dist,
+            epsilon = 1e-10
+        );
 
         // Point on the line
         assert!(line.contains(Point2::new(5.0, 5.0), 1e-10));

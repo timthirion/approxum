@@ -187,14 +187,8 @@ impl<F: Float> BoundingCapsule<F> {
         }
 
         // Spine endpoints in world coordinates
-        let start = Point2::new(
-            cx + min_u * cos_a,
-            cy + min_u * sin_a,
-        );
-        let end = Point2::new(
-            cx + max_u * cos_a,
-            cy + max_u * sin_a,
-        );
+        let start = Point2::new(cx + min_u * cos_a, cy + min_u * sin_a);
+        let end = Point2::new(cx + max_u * cos_a, cy + max_u * sin_a);
 
         Some(Self {
             segment: Segment2::new(start, end),

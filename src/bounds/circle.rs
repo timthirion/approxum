@@ -41,8 +41,7 @@ impl<F: Float> BoundingCircle<F> {
     /// Returns `None` if the points are collinear.
     pub fn from_three_points(a: Point2<F>, b: Point2<F>, c: Point2<F>) -> Option<Self> {
         // Using circumcenter formula
-        let d = (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y))
-            * (F::one() + F::one());
+        let d = (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)) * (F::one() + F::one());
 
         if d.abs() <= F::epsilon() {
             return None; // Collinear points
@@ -141,7 +140,10 @@ pub fn minimum_enclosing_circle<F: Float>(points: &[Point2<F>]) -> Option<Boundi
 ///
 /// `points` is the remaining points to process.
 /// `boundary` contains 0-3 points that must be on the circle boundary.
-fn welzl_recursive<F: Float>(points: &[Point2<F>], boundary: &mut Vec<Point2<F>>) -> BoundingCircle<F> {
+fn welzl_recursive<F: Float>(
+    points: &[Point2<F>],
+    boundary: &mut Vec<Point2<F>>,
+) -> BoundingCircle<F> {
     // Base cases: circle determined by boundary points
     if points.is_empty() || boundary.len() == 3 {
         return circle_from_boundary(boundary);
@@ -175,11 +177,9 @@ fn circle_from_boundary<F: Float>(boundary: &[Point2<F>]) -> BoundingCircle<F> {
         2 => BoundingCircle::from_two_points(boundary[0], boundary[1]),
         3 => {
             // Try circumcircle first
-            if let Some(circle) = BoundingCircle::from_three_points(
-                boundary[0],
-                boundary[1],
-                boundary[2],
-            ) {
+            if let Some(circle) =
+                BoundingCircle::from_three_points(boundary[0], boundary[1], boundary[2])
+            {
                 circle
             } else {
                 // Collinear: use the two furthest points
@@ -233,7 +233,11 @@ mod tests {
         .unwrap();
         assert_relative_eq!(c.center.x, 0.5, epsilon = 1e-10);
         assert_relative_eq!(c.center.y, 0.5, epsilon = 1e-10);
-        assert_relative_eq!(c.radius, 0.5_f64.sqrt() + 0.5_f64.sqrt() - 0.5_f64.sqrt(), epsilon = 1e-10);
+        assert_relative_eq!(
+            c.radius,
+            0.5_f64.sqrt() + 0.5_f64.sqrt() - 0.5_f64.sqrt(),
+            epsilon = 1e-10
+        );
     }
 
     #[test]

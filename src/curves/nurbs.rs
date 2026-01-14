@@ -109,11 +109,7 @@ impl<F: Float> Nurbs2<F> {
     }
 
     /// Creates a NURBS curve with uniform weights (equivalent to a B-spline).
-    pub fn from_bspline(
-        control_points: Vec<Point2<F>>,
-        degree: usize,
-        knots: Vec<F>,
-    ) -> Self {
+    pub fn from_bspline(control_points: Vec<Point2<F>>, degree: usize, knots: Vec<F>) -> Self {
         let weights = vec![F::one(); control_points.len()];
         Self::new(control_points, weights, degree, knots)
     }
@@ -570,8 +566,7 @@ mod tests {
             Point2::new(2.0, 0.0),
         ];
 
-        let nurbs: Nurbs2<f64> =
-            Nurbs2::with_uniform_knots(points.clone(), vec![1.0, 1.0, 1.0], 2);
+        let nurbs: Nurbs2<f64> = Nurbs2::with_uniform_knots(points.clone(), vec![1.0, 1.0, 1.0], 2);
 
         // With uniform weights, should behave like quadratic Bezier
         let mid = nurbs.eval(0.5);
@@ -598,8 +593,7 @@ mod tests {
         let mid_low = nurbs_low.eval(0.5);
 
         // Unit weight
-        let nurbs_unit: Nurbs2<f64> =
-            Nurbs2::with_uniform_knots(points, vec![1.0, 1.0, 1.0], 2);
+        let nurbs_unit: Nurbs2<f64> = Nurbs2::with_uniform_knots(points, vec![1.0, 1.0, 1.0], 2);
         let mid_unit = nurbs_unit.eval(0.5);
 
         // Higher weight should pull closer to control point (1, 2)
@@ -750,8 +744,7 @@ mod tests {
             Point2::new(2.0, 0.0),
         ];
 
-        let mut nurbs: Nurbs2<f64> =
-            Nurbs2::with_uniform_knots(points, vec![1.0, 0.5, 1.0], 2);
+        let mut nurbs: Nurbs2<f64> = Nurbs2::with_uniform_knots(points, vec![1.0, 0.5, 1.0], 2);
 
         let mid_before = nurbs.eval(0.5);
         nurbs.scale_weights(2.0);
@@ -786,8 +779,7 @@ mod tests {
             Point2::new(3.0, 0.0),
         ];
 
-        let nurbs: Nurbs2<f64> =
-            Nurbs2::with_uniform_knots(points, vec![1.0, 0.8, 1.2, 1.0], 2);
+        let nurbs: Nurbs2<f64> = Nurbs2::with_uniform_knots(points, vec![1.0, 0.8, 1.2, 1.0], 2);
 
         let (t_min, t_max) = nurbs.domain();
         let start = nurbs.eval(t_min);

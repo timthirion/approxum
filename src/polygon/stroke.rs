@@ -289,13 +289,7 @@ fn build_offset_side<F: Float>(
         let prev_normal = normals[i - 1];
         let next_normal = normals[i];
 
-        let join_points = compute_join(
-            points[i],
-            prev_normal,
-            next_normal,
-            offset,
-            options,
-        );
+        let join_points = compute_join(points[i], prev_normal, next_normal, offset, options);
 
         result.extend(join_points);
     }
@@ -336,12 +330,10 @@ fn build_closed_offset<F: Float>(
         let len = (dx * dx + dy * dy).sqrt();
         if len > F::epsilon() {
             normals.push(Point2::new(-dy / len, dx / len));
+        } else if let Some(&prev) = normals.last() {
+            normals.push(prev);
         } else {
-            if let Some(&prev) = normals.last() {
-                normals.push(prev);
-            } else {
-                normals.push(Point2::new(F::zero(), F::one()));
-            }
+            normals.push(Point2::new(F::zero(), F::one()));
         }
     }
 
@@ -351,13 +343,7 @@ fn build_closed_offset<F: Float>(
         let prev_normal = normals[prev_idx];
         let next_normal = normals[i];
 
-        let join_points = compute_join(
-            points[i],
-            prev_normal,
-            next_normal,
-            offset,
-            options,
-        );
+        let join_points = compute_join(points[i], prev_normal, next_normal, offset, options);
 
         result.extend(join_points);
     }
@@ -405,9 +391,7 @@ fn compute_join<F: Float>(
         LineJoin::Round => {
             compute_round_join(point, prev_normal, next_normal, offset, options, is_outer)
         }
-        LineJoin::Bevel => {
-            compute_bevel_join(point, prev_normal, next_normal, offset, is_outer)
-        }
+        LineJoin::Bevel => compute_bevel_join(point, prev_normal, next_normal, offset, is_outer),
     }
 }
 

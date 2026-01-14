@@ -64,12 +64,7 @@ use crate::primitives::{Point2, Point3, Vec2, Vec3};
 pub fn snap_to_grid(points: &[Point2<f64>], scale: f64) -> Vec<exactum::Point2<i64>> {
     points
         .iter()
-        .map(|p| {
-            exactum::Point2::new(
-                (p.x * scale).round() as i64,
-                (p.y * scale).round() as i64,
-            )
-        })
+        .map(|p| exactum::Point2::new((p.x * scale).round() as i64, (p.y * scale).round() as i64))
         .collect()
 }
 
@@ -93,21 +88,13 @@ pub fn snap_to_grid_3d(points: &[Point3<f64>], scale: f64) -> Vec<exactum::Point
 pub fn snap_to_grid_i32(points: &[Point2<f64>], scale: f64) -> Vec<exactum::Point2<i32>> {
     points
         .iter()
-        .map(|p| {
-            exactum::Point2::new(
-                (p.x * scale).round() as i32,
-                (p.y * scale).round() as i32,
-            )
-        })
+        .map(|p| exactum::Point2::new((p.x * scale).round() as i32, (p.y * scale).round() as i32))
         .collect()
 }
 
 /// Converts a single floating-point point to an integer point.
 pub fn snap_point(p: Point2<f64>, scale: f64) -> exactum::Point2<i64> {
-    exactum::Point2::new(
-        (p.x * scale).round() as i64,
-        (p.y * scale).round() as i64,
-    )
+    exactum::Point2::new((p.x * scale).round() as i64, (p.y * scale).round() as i64)
 }
 
 /// Converts a single floating-point 3D point to an integer point.

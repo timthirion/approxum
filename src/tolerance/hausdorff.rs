@@ -449,11 +449,19 @@ mod tests {
 
         // Point directly above first segment
         let p1 = Point2::new(5.0, 3.0);
-        assert!(approx_eq(min_distance_to_polyline(p1, &polyline), 3.0, 1e-10));
+        assert!(approx_eq(
+            min_distance_to_polyline(p1, &polyline),
+            3.0,
+            1e-10
+        ));
 
         // Point at corner
         let p2 = Point2::new(10.0, 0.0);
-        assert!(approx_eq(min_distance_to_polyline(p2, &polyline), 0.0, 1e-10));
+        assert!(approx_eq(
+            min_distance_to_polyline(p2, &polyline),
+            0.0,
+            1e-10
+        ));
     }
 
     #[test]

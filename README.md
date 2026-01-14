@@ -1,5 +1,7 @@
 ![approxum logo](screenshots/logo.svg)
 
+[![CI](https://github.com/timthirion/approxum/actions/workflows/ci.yml/badge.svg)](https://github.com/timthirion/approxum/actions/workflows/ci.yml)
+
 *"The purpose of computing is insight, not numbers."* - Richard Hamming
 
 Geometric approximation algorithms in Rust. When good enough is good enough.

@@ -75,7 +75,10 @@ pub fn visvalingam_indices<F: Float>(points: &[Point2<F>], min_area: F) -> Vec<u
 }
 
 /// Simplifies to a target count and returns indices of retained points.
-pub fn visvalingam_indices_by_count<F: Float>(points: &[Point2<F>], target_count: usize) -> Vec<usize> {
+pub fn visvalingam_indices_by_count<F: Float>(
+    points: &[Point2<F>],
+    target_count: usize,
+) -> Vec<usize> {
     visvalingam_impl(points, None, Some(target_count))
 }
 
@@ -104,7 +107,10 @@ impl<F: Float> PartialOrd for AreaEntry<F> {
 impl<F: Float> Ord for AreaEntry<F> {
     fn cmp(&self, other: &Self) -> Ordering {
         // Reverse ordering for min-heap behavior
-        other.area.partial_cmp(&self.area).unwrap_or(Ordering::Equal)
+        other
+            .area
+            .partial_cmp(&self.area)
+            .unwrap_or(Ordering::Equal)
     }
 }
 
@@ -130,8 +136,12 @@ fn visvalingam_impl<F: Float>(
 
     // Linked list structure: prev[i] and next[i] give neighbors
     // Using usize::MAX as null sentinel
-    let mut prev: Vec<usize> = (0..n).map(|i| if i == 0 { usize::MAX } else { i - 1 }).collect();
-    let mut next: Vec<usize> = (0..n).map(|i| if i == n - 1 { usize::MAX } else { i + 1 }).collect();
+    let mut prev: Vec<usize> = (0..n)
+        .map(|i| if i == 0 { usize::MAX } else { i - 1 })
+        .collect();
+    let mut next: Vec<usize> = (0..n)
+        .map(|i| if i == n - 1 { usize::MAX } else { i + 1 })
+        .collect();
 
     // Track which points are still active
     let mut active = vec![true; n];
@@ -341,12 +351,12 @@ mod tests {
     #[test]
     fn test_visvalingam_indices() {
         let points: Vec<Point2<f64>> = vec![
-            Point2::new(0.0, 0.0),  // 0
-            Point2::new(1.0, 0.0),  // 1 - small area, remove
-            Point2::new(2.0, 0.0),  // 2 - small area, remove
-            Point2::new(3.0, 5.0),  // 3 - large area, keep
-            Point2::new(4.0, 0.0),  // 4 - small area, remove
-            Point2::new(5.0, 0.0),  // 5
+            Point2::new(0.0, 0.0), // 0
+            Point2::new(1.0, 0.0), // 1 - small area, remove
+            Point2::new(2.0, 0.0), // 2 - small area, remove
+            Point2::new(3.0, 5.0), // 3 - large area, keep
+            Point2::new(4.0, 0.0), // 4 - small area, remove
+            Point2::new(5.0, 0.0), // 5
         ];
 
         let indices = visvalingam_indices(&points, 1.0);

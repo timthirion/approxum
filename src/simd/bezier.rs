@@ -2,6 +2,8 @@
 //!
 //! Evaluates curves at 4 parameter values simultaneously.
 
+#![allow(clippy::needless_range_loop)]
+
 use wide::f32x4;
 
 use crate::curves::{CubicBezier2, QuadraticBezier2};
@@ -56,12 +58,7 @@ impl QuadraticBezier2x4 {
     #[inline]
     pub fn eval_uniform(&self, start_t: f32, end_t: f32) -> Point2x4 {
         let delta = (end_t - start_t) / 3.0;
-        let t = f32x4::new([
-            start_t,
-            start_t + delta,
-            start_t + 2.0 * delta,
-            end_t,
-        ]);
+        let t = f32x4::new([start_t, start_t + delta, start_t + 2.0 * delta, end_t]);
         self.eval(t)
     }
 
@@ -125,12 +122,7 @@ impl CubicBezier2x4 {
     #[inline]
     pub fn eval_uniform(&self, start_t: f32, end_t: f32) -> Point2x4 {
         let delta = (end_t - start_t) / 3.0;
-        let t = f32x4::new([
-            start_t,
-            start_t + delta,
-            start_t + 2.0 * delta,
-            end_t,
-        ]);
+        let t = f32x4::new([start_t, start_t + delta, start_t + 2.0 * delta, end_t]);
         self.eval(t)
     }
 

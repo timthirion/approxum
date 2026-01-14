@@ -15,9 +15,7 @@ fn bench_quadratic_bezier_eval(c: &mut Criterion) {
     );
 
     // Single evaluation
-    group.bench_function("single", |b| {
-        b.iter(|| curve.eval(black_box(0.5)))
-    });
+    group.bench_function("single", |b| b.iter(|| curve.eval(black_box(0.5))));
 
     // Multiple evaluations
     for count in [10, 100, 1000] {
@@ -46,9 +44,7 @@ fn bench_cubic_bezier_eval(c: &mut Criterion) {
         Point2::new(10.0, 0.0),
     );
 
-    group.bench_function("single", |b| {
-        b.iter(|| curve.eval(black_box(0.5)))
-    });
+    group.bench_function("single", |b| b.iter(|| curve.eval(black_box(0.5))));
 
     for count in [10, 100, 1000] {
         group.throughput(Throughput::Elements(count as u64));
@@ -76,13 +72,9 @@ fn bench_cubic_bezier_split(c: &mut Criterion) {
         Point2::new(10.0, 0.0),
     );
 
-    group.bench_function("split_at_0.5", |b| {
-        b.iter(|| curve.split(black_box(0.5)))
-    });
+    group.bench_function("split_at_0.5", |b| b.iter(|| curve.split(black_box(0.5))));
 
-    group.bench_function("split_at_0.25", |b| {
-        b.iter(|| curve.split(black_box(0.25)))
-    });
+    group.bench_function("split_at_0.25", |b| b.iter(|| curve.split(black_box(0.25))));
 
     group.finish();
 }
@@ -102,9 +94,7 @@ fn bench_cubic_bezier_to_polyline(c: &mut Criterion) {
         group.bench_with_input(
             BenchmarkId::new("tolerance", format!("{}", tolerance)),
             &tolerance,
-            |b, &tol| {
-                b.iter(|| curve.to_polyline(black_box(tol)))
-            },
+            |b, &tol| b.iter(|| curve.to_polyline(black_box(tol))),
         );
     }
 
@@ -126,9 +116,7 @@ fn bench_arc_to_polyline(c: &mut Criterion) {
         group.bench_with_input(
             BenchmarkId::new("tolerance", format!("{}", tolerance)),
             &tolerance,
-            |b, &tol| {
-                b.iter(|| arc.to_polyline(black_box(tol)))
-            },
+            |b, &tol| b.iter(|| arc.to_polyline(black_box(tol))),
         );
     }
 
@@ -143,9 +131,7 @@ fn bench_arc_from_three_points(c: &mut Criterion) {
     let p3 = Point2::new(10.0, 0.0);
 
     group.bench_function("construct", |b| {
-        b.iter(|| {
-            Arc2::from_three_points(black_box(p1), black_box(p2), black_box(p3))
-        })
+        b.iter(|| Arc2::from_three_points(black_box(p1), black_box(p2), black_box(p3)))
     });
 
     group.finish();
@@ -178,13 +164,9 @@ fn bench_fit_cubic(c: &mut Criterion) {
         let points = generate_curve_points(num_points);
         group.throughput(Throughput::Elements(num_points as u64));
 
-        group.bench_with_input(
-            BenchmarkId::new("points", num_points),
-            &points,
-            |b, pts| {
-                b.iter(|| fit_cubic(black_box(pts)))
-            },
-        );
+        group.bench_with_input(BenchmarkId::new("points", num_points), &points, |b, pts| {
+            b.iter(|| fit_cubic(black_box(pts)))
+        });
     }
 
     group.finish();

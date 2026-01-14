@@ -266,7 +266,8 @@ impl<F: Float> Obb2<F> {
                 let center_u = (min_u + max_u) / F::from(2.0).unwrap();
                 let center_v = (min_v + max_v) / F::from(2.0).unwrap();
 
-                let center = Point2::new(center_u * ux + center_v * vx, center_u * uy + center_v * vy);
+                let center =
+                    Point2::new(center_u * ux + center_v * vx, center_u * uy + center_v * vy);
 
                 let angle = uy.atan2(ux);
 
@@ -472,12 +473,8 @@ mod tests {
     #[test]
     fn test_contains_point_rotated() {
         // 45 degree rotated box
-        let obb: Obb2<f64> = Obb2::new(
-            Point2::new(0.0, 0.0),
-            2.0,
-            1.0,
-            std::f64::consts::FRAC_PI_4,
-        );
+        let obb: Obb2<f64> =
+            Obb2::new(Point2::new(0.0, 0.0), 2.0, 1.0, std::f64::consts::FRAC_PI_4);
 
         // Center should be inside
         assert!(obb.contains_point(Point2::new(0.0, 0.0)));
@@ -566,12 +563,8 @@ mod tests {
     #[test]
     fn test_intersects_rotated() {
         // Two rotated boxes that intersect
-        let obb1: Obb2<f64> = Obb2::new(
-            Point2::new(0.0, 0.0),
-            2.0,
-            1.0,
-            std::f64::consts::FRAC_PI_4,
-        );
+        let obb1: Obb2<f64> =
+            Obb2::new(Point2::new(0.0, 0.0), 2.0, 1.0, std::f64::consts::FRAC_PI_4);
         let obb2: Obb2<f64> = Obb2::axis_aligned(Point2::new(0.0, 0.0), 1.0, 1.0);
 
         assert!(obb1.intersects(obb2));

@@ -118,6 +118,7 @@ impl<F: Float> Ellipse2<F> {
     /// Transforms a point from world coordinates to the ellipse's local coordinates.
     ///
     /// In local coordinates, the ellipse is axis-aligned and centered at origin.
+    #[allow(clippy::wrong_self_convention)]
     fn to_local(&self, point: Point2<F>) -> Point2<F> {
         let dx = point.x - self.center.x;
         let dy = point.y - self.center.y;
@@ -127,6 +128,7 @@ impl<F: Float> Ellipse2<F> {
     }
 
     /// Transforms a point from local coordinates back to world coordinates.
+    #[allow(clippy::wrong_self_convention)]
     fn from_local(&self, local: Point2<F>) -> Point2<F> {
         let cos_r = self.rotation.cos();
         let sin_r = self.rotation.sin();
@@ -341,7 +343,10 @@ impl<F: Float> Ellipse2<F> {
     fn dir_to_local(&self, dir: Vec2<F>) -> Vec2<F> {
         let cos_r = self.rotation.cos();
         let sin_r = self.rotation.sin();
-        Vec2::new(dir.x * cos_r + dir.y * sin_r, -dir.x * sin_r + dir.y * cos_r)
+        Vec2::new(
+            dir.x * cos_r + dir.y * sin_r,
+            -dir.x * sin_r + dir.y * cos_r,
+        )
     }
 
     /// Intersects this ellipse with an infinite line.
@@ -404,8 +409,12 @@ impl<F: Float> Ellipse2<F> {
         let coef_c = (ox * ox) / (a * a) + (oy * oy) / (b * b) - F::one();
 
         // Get all intersections then filter for t >= 0
-        let all_hits = self.solve_quadratic_intersection(coef_a, coef_b, coef_c, &local_dir, &local_origin);
-        all_hits.into_iter().filter(|(_, t)| *t >= F::zero()).collect()
+        let all_hits =
+            self.solve_quadratic_intersection(coef_a, coef_b, coef_c, &local_dir, &local_origin);
+        all_hits
+            .into_iter()
+            .filter(|(_, t)| *t >= F::zero())
+            .collect()
     }
 
     /// Intersects this ellipse with a line segment.
@@ -427,7 +436,8 @@ impl<F: Float> Ellipse2<F> {
         let coef_b = F::from(2.0).unwrap() * ((ox * dx) / (a * a) + (oy * dy) / (b * b));
         let coef_c = (ox * ox) / (a * a) + (oy * oy) / (b * b) - F::one();
 
-        let all_hits = self.solve_quadratic_intersection(coef_a, coef_b, coef_c, &local_dir, &local_start);
+        let all_hits =
+            self.solve_quadratic_intersection(coef_a, coef_b, coef_c, &local_dir, &local_start);
         all_hits
             .into_iter()
             .filter(|(_, t)| *t >= F::zero() && *t <= F::one())
@@ -442,9 +452,7 @@ impl<F: Float> Ellipse2<F> {
         // Special case: if this is actually a circle
         if self.is_circle() {
             let my_circle = Circle2::new(self.center, self.semi_major);
-            return my_circle
-                .intersect_circle(circle)
-                .unwrap_or_default();
+            return my_circle.intersect_circle(circle).unwrap_or_default();
         }
 
         // General case: sample the ellipse and find intersections numerically
@@ -550,14 +558,18 @@ impl<F: Float> Ellipse2<F> {
                 // Binary search to refine
                 if let Some(intersection) = self.bisect_intersection(&f, prev_t, t, tolerance) {
                     // Avoid duplicates
-                    let is_duplicate = results.iter().any(|p: &Point2<F>| p.distance(intersection) < tolerance);
+                    let is_duplicate = results
+                        .iter()
+                        .any(|p: &Point2<F>| p.distance(intersection) < tolerance);
                     if !is_duplicate {
                         results.push(intersection);
                     }
                 }
             } else if val.abs() < tolerance {
                 // Point is on the curve
-                let is_duplicate = results.iter().any(|p: &Point2<F>| p.distance(point) < tolerance);
+                let is_duplicate = results
+                    .iter()
+                    .any(|p: &Point2<F>| p.distance(point) < tolerance);
                 if !is_duplicate {
                     results.push(point);
                 }
@@ -571,7 +583,13 @@ impl<F: Float> Ellipse2<F> {
     }
 
     /// Binary search to find exact intersection point.
-    fn bisect_intersection<G>(&self, f: &G, mut t_low: F, mut t_high: F, tolerance: F) -> Option<Point2<F>>
+    fn bisect_intersection<G>(
+        &self,
+        f: &G,
+        mut t_low: F,
+        mut t_high: F,
+        tolerance: F,
+    ) -> Option<Point2<F>>
     where
         G: Fn(Point2<F>) -> F,
     {
@@ -624,8 +642,14 @@ impl<F: Float> Ellipse2<F> {
     pub fn intersects_circle(&self, circle: &Circle2<F>) -> bool {
         // Quick bounding box check first
         let (e_min, e_max) = self.bounding_box();
-        let c_min = Point2::new(circle.center.x - circle.radius, circle.center.y - circle.radius);
-        let c_max = Point2::new(circle.center.x + circle.radius, circle.center.y + circle.radius);
+        let c_min = Point2::new(
+            circle.center.x - circle.radius,
+            circle.center.y - circle.radius,
+        );
+        let c_max = Point2::new(
+            circle.center.x + circle.radius,
+            circle.center.y + circle.radius,
+        );
 
         if e_max.x < c_min.x || e_min.x > c_max.x || e_max.y < c_min.y || e_min.y > c_max.y {
             return false;
@@ -707,7 +731,11 @@ mod tests {
     fn test_circumference() {
         // For a circle, circumference should be 2*pi*r
         let circle: Ellipse2<f64> = Ellipse2::from_circle(Point2::origin(), 1.0);
-        assert_relative_eq!(circle.circumference(), std::f64::consts::TAU, epsilon = 0.01);
+        assert_relative_eq!(
+            circle.circumference(),
+            std::f64::consts::TAU,
+            epsilon = 0.01
+        );
     }
 
     #[test]
@@ -725,12 +753,8 @@ mod tests {
     #[test]
     fn test_contains_rotated() {
         // Ellipse rotated 90 degrees: major axis now along y
-        let e: Ellipse2<f64> = Ellipse2::new(
-            Point2::origin(),
-            2.0,
-            1.0,
-            std::f64::consts::FRAC_PI_2,
-        );
+        let e: Ellipse2<f64> =
+            Ellipse2::new(Point2::origin(), 2.0, 1.0, std::f64::consts::FRAC_PI_2);
 
         assert!(e.contains(Point2::new(0.0, 2.0))); // On boundary (now along y)
         assert!(e.contains(Point2::new(1.0, 0.0))); // On boundary (minor, now along x)
@@ -764,12 +788,8 @@ mod tests {
     #[test]
     fn test_bounding_box_rotated() {
         // 45 degree rotation
-        let e: Ellipse2<f64> = Ellipse2::new(
-            Point2::origin(),
-            2.0,
-            1.0,
-            std::f64::consts::FRAC_PI_4,
-        );
+        let e: Ellipse2<f64> =
+            Ellipse2::new(Point2::origin(), 2.0, 1.0, std::f64::consts::FRAC_PI_4);
         let (min, max) = e.bounding_box();
 
         // At 45 degrees, both dimensions should be sqrt(a^2/2 + b^2/2) = sqrt(2.5)
@@ -855,7 +875,11 @@ mod tests {
         let e: Ellipse2<f64> = Ellipse2::axis_aligned(Point2::origin(), 2.0, 1.0);
         let rotated = e.rotated(std::f64::consts::FRAC_PI_2);
 
-        assert_relative_eq!(rotated.rotation, std::f64::consts::FRAC_PI_2, epsilon = 1e-10);
+        assert_relative_eq!(
+            rotated.rotation,
+            std::f64::consts::FRAC_PI_2,
+            epsilon = 1e-10
+        );
     }
 
     #[test]
@@ -932,12 +956,8 @@ mod tests {
     #[test]
     fn test_intersect_line_rotated_ellipse() {
         // Ellipse rotated 90 degrees
-        let e: Ellipse2<f64> = Ellipse2::new(
-            Point2::origin(),
-            2.0,
-            1.0,
-            std::f64::consts::FRAC_PI_2,
-        );
+        let e: Ellipse2<f64> =
+            Ellipse2::new(Point2::origin(), 2.0, 1.0, std::f64::consts::FRAC_PI_2);
         let line = Line2::horizontal(0.0);
 
         let hits = e.intersect_line(&line);

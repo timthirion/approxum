@@ -229,7 +229,10 @@ pub fn voronoi_diagram<F: Float>(sites: &[Point2<F>]) -> VoronoiDiagram<F> {
             // Direction perpendicular to the Delaunay edge, pointing outward
             let pa = sites[site_a];
             let pb = sites[site_b];
-            let mid = Point2::new((pa.x + pb.x) / F::from(2.0).unwrap(), (pa.y + pb.y) / F::from(2.0).unwrap());
+            let mid = Point2::new(
+                (pa.x + pb.x) / F::from(2.0).unwrap(),
+                (pa.y + pb.y) / F::from(2.0).unwrap(),
+            );
 
             // Edge direction
             let edge_dir = Vec2::new(pb.x - pa.x, pb.y - pa.y);
@@ -285,8 +288,8 @@ pub fn voronoi_diagram<F: Float>(sites: &[Point2<F>]) -> VoronoiDiagram<F> {
     // Build cells for each site
     let mut cells: Vec<VoronoiCell> = Vec::with_capacity(sites.len());
 
-    for site in 0..sites.len() {
-        let vertex_set = site_to_vertices.get(&site);
+    for (site_idx, &site_pt) in sites.iter().enumerate() {
+        let vertex_set = site_to_vertices.get(&site_idx);
         let mut cell_vertices: Vec<usize> = match vertex_set {
             Some(v) => {
                 // Deduplicate
@@ -300,20 +303,21 @@ pub fn voronoi_diagram<F: Float>(sites: &[Point2<F>]) -> VoronoiDiagram<F> {
 
         // Sort vertices in CCW order around the site
         if cell_vertices.len() > 1 {
-            let site_pt = sites[site];
             cell_vertices.sort_by(|&a, &b| {
                 let va = vertices[a];
                 let vb = vertices[b];
                 let angle_a = (va.y - site_pt.y).atan2(va.x - site_pt.x);
                 let angle_b = (vb.y - site_pt.y).atan2(vb.x - site_pt.x);
-                angle_a.partial_cmp(&angle_b).unwrap_or(std::cmp::Ordering::Equal)
+                angle_a
+                    .partial_cmp(&angle_b)
+                    .unwrap_or(std::cmp::Ordering::Equal)
             });
         }
 
         cells.push(VoronoiCell {
-            site,
+            site: site_idx,
             vertices: cell_vertices,
-            unbounded: unbounded_sites.contains(&site),
+            unbounded: unbounded_sites.contains(&site_idx),
         });
     }
 

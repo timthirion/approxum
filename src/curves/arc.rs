@@ -374,12 +374,8 @@ mod tests {
     #[test]
     fn test_arc_from_bulge() {
         // Semicircle (bulge = 1)
-        let arc: Arc2<f64> = Arc2::from_bulge(
-            Point2::new(0.0, 0.0),
-            Point2::new(2.0, 0.0),
-            1.0,
-        )
-        .unwrap();
+        let arc: Arc2<f64> =
+            Arc2::from_bulge(Point2::new(0.0, 0.0), Point2::new(2.0, 0.0), 1.0).unwrap();
 
         assert_relative_eq!(arc.radius, 1.0, epsilon = 1e-10);
         assert_relative_eq!(arc.center.x, 1.0, epsilon = 1e-10);
@@ -389,11 +385,8 @@ mod tests {
     #[test]
     fn test_arc_from_bulge_zero() {
         // Zero bulge = straight line = None
-        let result: Option<Arc2<f64>> = Arc2::from_bulge(
-            Point2::new(0.0, 0.0),
-            Point2::new(2.0, 0.0),
-            0.0,
-        );
+        let result: Option<Arc2<f64>> =
+            Arc2::from_bulge(Point2::new(0.0, 0.0), Point2::new(2.0, 0.0), 0.0);
         assert!(result.is_none());
     }
 
@@ -432,12 +425,7 @@ mod tests {
 
     #[test]
     fn test_arc_f32() {
-        let arc: Arc2<f32> = Arc2::new(
-            Point2::new(0.0, 0.0),
-            1.0,
-            0.0,
-            std::f32::consts::PI / 2.0,
-        );
+        let arc: Arc2<f32> = Arc2::new(Point2::new(0.0, 0.0), 1.0, 0.0, std::f32::consts::PI / 2.0);
         let polyline = arc.to_polyline(0.01);
         assert!(polyline.len() >= 2);
     }

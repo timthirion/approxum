@@ -74,7 +74,8 @@ pub fn sutherland_hodgman<F: Float>(subject: &Polygon<F>, clip: &Polygon<F>) -> 
                 output.push(current);
                 if !next_inside {
                     // Exiting: add intersection
-                    if let Some(intersection) = line_intersection(current, next, edge_start, edge_end)
+                    if let Some(intersection) =
+                        line_intersection(current, next, edge_start, edge_end)
                     {
                         output.push(intersection);
                     }
@@ -94,7 +95,10 @@ pub fn sutherland_hodgman<F: Float>(subject: &Polygon<F>, clip: &Polygon<F>) -> 
 /// Clips a polygon against a convex clipping polygon.
 ///
 /// This is an alias for `sutherland_hodgman` with a more descriptive name.
-pub fn clip_polygon_by_convex<F: Float>(subject: &Polygon<F>, convex_clip: &Polygon<F>) -> Polygon<F> {
+pub fn clip_polygon_by_convex<F: Float>(
+    subject: &Polygon<F>,
+    convex_clip: &Polygon<F>,
+) -> Polygon<F> {
     sutherland_hodgman(subject, convex_clip)
 }
 

@@ -152,9 +152,7 @@ impl<F: Float> BSpline2<F> {
         );
 
         let num_knots = n + degree + 1;
-        let knots: Vec<F> = (0..num_knots)
-            .map(|i| F::from(i).unwrap())
-            .collect();
+        let knots: Vec<F> = (0..num_knots).map(|i| F::from(i).unwrap()).collect();
 
         Self {
             control_points,
@@ -243,9 +241,7 @@ impl<F: Float> BSpline2<F> {
         let p = self.degree;
 
         // Copy the relevant control points
-        let mut d: Vec<Point2<F>> = (0..=p)
-            .map(|j| self.control_points[k - p + j])
-            .collect();
+        let mut d: Vec<Point2<F>> = (0..=p).map(|j| self.control_points[k - p + j]).collect();
 
         // de Boor recursion
         for r in 1..=p {
@@ -307,11 +303,7 @@ impl<F: Float> BSpline2<F> {
     pub fn num_bezier_segments(&self) -> usize {
         let n = self.control_points.len();
         let p = self.degree;
-        if n <= p {
-            0
-        } else {
-            n - p
-        }
+        n.saturating_sub(p)
     }
 
     /// Computes the derivative B-spline.

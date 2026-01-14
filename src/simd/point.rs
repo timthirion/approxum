@@ -332,12 +332,24 @@ impl Point2x8 {
     pub fn from_slice(points: &[Point2<f32>]) -> Self {
         Self {
             x: f32x8::new([
-                points[0].x, points[1].x, points[2].x, points[3].x,
-                points[4].x, points[5].x, points[6].x, points[7].x,
+                points[0].x,
+                points[1].x,
+                points[2].x,
+                points[3].x,
+                points[4].x,
+                points[5].x,
+                points[6].x,
+                points[7].x,
             ]),
             y: f32x8::new([
-                points[0].y, points[1].y, points[2].y, points[3].y,
-                points[4].y, points[5].y, points[6].y, points[7].y,
+                points[0].y,
+                points[1].y,
+                points[2].y,
+                points[3].y,
+                points[4].y,
+                points[5].y,
+                points[6].y,
+                points[7].y,
             ]),
         }
     }

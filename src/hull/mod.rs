@@ -93,7 +93,9 @@ pub fn convex_hull<F: Float>(points: &[Point2<F>]) -> Vec<Point2<F>> {
     // Build lower hull
     let mut lower: Vec<Point2<F>> = Vec::new();
     for &p in &sorted {
-        while lower.len() >= 2 && cross(&lower[lower.len() - 2], &lower[lower.len() - 1], &p) <= F::zero() {
+        while lower.len() >= 2
+            && cross(&lower[lower.len() - 2], &lower[lower.len() - 1], &p) <= F::zero()
+        {
             lower.pop();
         }
         lower.push(p);
@@ -102,7 +104,9 @@ pub fn convex_hull<F: Float>(points: &[Point2<F>]) -> Vec<Point2<F>> {
     // Build upper hull
     let mut upper: Vec<Point2<F>> = Vec::new();
     for &p in sorted.iter().rev() {
-        while upper.len() >= 2 && cross(&upper[upper.len() - 2], &upper[upper.len() - 1], &p) <= F::zero() {
+        while upper.len() >= 2
+            && cross(&upper[upper.len() - 2], &upper[upper.len() - 1], &p) <= F::zero()
+        {
             upper.pop();
         }
         upper.push(p);
@@ -171,7 +175,9 @@ pub fn convex_hull_indices<F: Float>(points: &[Point2<F>]) -> Vec<usize> {
     // Build lower hull
     let mut lower: Vec<(usize, Point2<F>)> = Vec::new();
     for &(idx, p) in &indexed {
-        while lower.len() >= 2 && cross(&lower[lower.len() - 2].1, &lower[lower.len() - 1].1, &p) <= F::zero() {
+        while lower.len() >= 2
+            && cross(&lower[lower.len() - 2].1, &lower[lower.len() - 1].1, &p) <= F::zero()
+        {
             lower.pop();
         }
         lower.push((idx, p));
@@ -180,7 +186,9 @@ pub fn convex_hull_indices<F: Float>(points: &[Point2<F>]) -> Vec<usize> {
     // Build upper hull
     let mut upper: Vec<(usize, Point2<F>)> = Vec::new();
     for &(idx, p) in indexed.iter().rev() {
-        while upper.len() >= 2 && cross(&upper[upper.len() - 2].1, &upper[upper.len() - 1].1, &p) <= F::zero() {
+        while upper.len() >= 2
+            && cross(&upper[upper.len() - 2].1, &upper[upper.len() - 1].1, &p) <= F::zero()
+        {
             upper.pop();
         }
         upper.push((idx, p));

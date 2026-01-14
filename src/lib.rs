@@ -20,9 +20,6 @@ pub mod triangulation;
 #[cfg(feature = "simd")]
 pub mod simd;
 
-#[cfg(feature = "exactum")]
-pub mod bridge;
-
 pub use bounds::{minimum_enclosing_circle, Aabb2, BoundingCapsule, BoundingCircle, Obb2};
 pub use error::ApproxError;
 pub use io::{

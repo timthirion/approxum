@@ -186,15 +186,6 @@ let offset = offset_cubic_to_polyline(&curve, 15.0, 0.5);
 
 ![SDF visualization with contour lines](screenshots/sdf.svg)
 
-## Companion to exactum
-
-**approxum** is designed as a companion to [exactum](https://github.com/...), which provides exact integer geometry. Use exactum when correctness is critical; use approxum for:
-
-- Preprocessing noisy input data
-- LOD generation and mesh simplification
-- Visualization and rendering
-- "Good enough" spatial queries
-
 ## Minimum Supported Rust Version
 
 Rust 1.70 or later.

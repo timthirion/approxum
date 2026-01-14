@@ -516,7 +516,7 @@ fn generate_visibility() -> String {
 /// Boolean operations example
 fn generate_boolean_ops() -> String {
     let mut svg = Svg::with_viewbox(0.0, 0.0, 800.0, 250.0);
-    svg.rect(0.0, 0.0, 800.0, 250.0, "white");
+    svg.rect(0.0, 0.0, 800.0, 250.0, "#1a1a2e");
 
     // Helper to create a circle (64 vertices for smooth curves)
     let make_circle = |cx: f64, cy: f64, r: f64| -> Vec<Point2<f64>> {
@@ -598,7 +598,7 @@ fn generate_boolean_ops() -> String {
     // Show original shape outlines on top
     svg.polygon(&circle_a, "none", "#e74c3c", 1.5);
     svg.polygon(&circle_b, "none", "#3498db", 1.5);
-    svg.text(union_cx - 20.0, 230.0, "Union", 14.0, "#333");
+    svg.text(union_cx - 20.0, 230.0, "Union", 14.0, "#ecf0f1");
 
     // === Intersection: Hexagon + Star ===
     let inter_cx = 400.0;
@@ -614,7 +614,7 @@ fn generate_boolean_ops() -> String {
     for poly in &inter_result {
         svg.polygon(&poly.vertices, "#27ae60", "#1e8449", 2.5);
     }
-    svg.text(inter_cx - 45.0, 230.0, "Intersection", 14.0, "#333");
+    svg.text(inter_cx - 45.0, 230.0, "Intersection", 14.0, "#ecf0f1");
 
     // === Difference: Pill - Triangle ===
     let diff_cx = 667.0;
@@ -630,8 +630,8 @@ fn generate_boolean_ops() -> String {
         svg.polygon(&poly.vertices, "#3498db", "#2980b9", 2.0);
     }
     // Draw triangle outline on top to show what was subtracted
-    svg.polygon(&tri, "white", "#e74c3c", 2.0);
-    svg.text(diff_cx - 40.0, 230.0, "Difference", 14.0, "#333");
+    svg.polygon(&tri, "#1a1a2e", "#e74c3c", 2.0);
+    svg.text(diff_cx - 40.0, 230.0, "Difference", 14.0, "#ecf0f1");
 
     svg.to_string(800.0, 250.0)
 }
@@ -692,7 +692,7 @@ fn generate_voronoi() -> String {
 /// Polygon offset example with two shapes side by side
 fn generate_skeleton() -> String {
     let mut svg = Svg::with_viewbox(0.0, 0.0, 800.0, 300.0);
-    svg.rect(0.0, 0.0, 800.0, 300.0, "white");
+    svg.rect(0.0, 0.0, 800.0, 300.0, "#1a1a2e");
 
     let colors = ["#3498db", "#9b59b6", "#e74c3c", "#f39c12"];
 
@@ -714,9 +714,9 @@ fn generate_skeleton() -> String {
             svg.polygon(&offset.vertices, "none", colors[i], 2.0);
         }
     }
-    svg.polygon(&hexagon, "none", "#2c3e50", 3.0);
+    svg.polygon(&hexagon, "none", "#ecf0f1", 3.0);
     for p in &hexagon {
-        svg.circle(p.x, p.y, 4.0, "#2c3e50", "#fff", 1.5);
+        svg.circle(p.x, p.y, 4.0, "#ecf0f1", "#1a1a2e", 1.5);
     }
 
     // Right: Pentagon
@@ -736,9 +736,9 @@ fn generate_skeleton() -> String {
             svg.polygon(&offset.vertices, "none", colors[i], 2.0);
         }
     }
-    svg.polygon(&pentagon, "none", "#2c3e50", 3.0);
+    svg.polygon(&pentagon, "none", "#ecf0f1", 3.0);
     for p in &pentagon {
-        svg.circle(p.x, p.y, 4.0, "#2c3e50", "#fff", 1.5);
+        svg.circle(p.x, p.y, 4.0, "#ecf0f1", "#1a1a2e", 1.5);
     }
 
     svg.to_string(800.0, 300.0)
@@ -747,7 +747,7 @@ fn generate_skeleton() -> String {
 /// Curve offset example with two curves side by side
 fn generate_curve_offset() -> String {
     let mut svg = Svg::with_viewbox(0.0, 0.0, 800.0, 300.0);
-    svg.rect(0.0, 0.0, 800.0, 300.0, "#f8f9fa");
+    svg.rect(0.0, 0.0, 800.0, 300.0, "#1a1a2e");
 
     let offsets = [-40.0, -25.0, -12.0, 12.0, 25.0, 40.0];
     let colors = [
@@ -767,7 +767,7 @@ fn generate_curve_offset() -> String {
         svg.polyline_path(&offset_curve, "none", color, 2.0);
     }
     let main_curve1 = curve1.to_polyline(0.5);
-    svg.polyline_path(&main_curve1, "none", "#2c3e50", 3.0);
+    svg.polyline_path(&main_curve1, "none", "#ecf0f1", 3.0);
     svg.line(
         curve1.p0.x,
         curve1.p0.y,
@@ -784,10 +784,10 @@ fn generate_curve_offset() -> String {
         "#e74c3c",
         1.0,
     );
-    svg.circle(curve1.p0.x, curve1.p0.y, 5.0, "#2c3e50", "#fff", 1.5);
-    svg.circle(curve1.p1.x, curve1.p1.y, 4.0, "#e74c3c", "#fff", 1.5);
-    svg.circle(curve1.p2.x, curve1.p2.y, 4.0, "#e74c3c", "#fff", 1.5);
-    svg.circle(curve1.p3.x, curve1.p3.y, 5.0, "#2c3e50", "#fff", 1.5);
+    svg.circle(curve1.p0.x, curve1.p0.y, 5.0, "#ecf0f1", "#1a1a2e", 1.5);
+    svg.circle(curve1.p1.x, curve1.p1.y, 4.0, "#e74c3c", "#1a1a2e", 1.5);
+    svg.circle(curve1.p2.x, curve1.p2.y, 4.0, "#e74c3c", "#1a1a2e", 1.5);
+    svg.circle(curve1.p3.x, curve1.p3.y, 5.0, "#ecf0f1", "#1a1a2e", 1.5);
 
     // Right: Simple arc (control points form a symmetric bow)
     let curve2 = CubicBezier2::new(
@@ -802,7 +802,7 @@ fn generate_curve_offset() -> String {
         svg.polyline_path(&offset_curve, "none", color, 2.0);
     }
     let main_curve2 = curve2.to_polyline(0.5);
-    svg.polyline_path(&main_curve2, "none", "#2c3e50", 3.0);
+    svg.polyline_path(&main_curve2, "none", "#ecf0f1", 3.0);
     svg.line(
         curve2.p0.x,
         curve2.p0.y,
@@ -819,10 +819,10 @@ fn generate_curve_offset() -> String {
         "#e74c3c",
         1.0,
     );
-    svg.circle(curve2.p0.x, curve2.p0.y, 5.0, "#2c3e50", "#fff", 1.5);
-    svg.circle(curve2.p1.x, curve2.p1.y, 4.0, "#e74c3c", "#fff", 1.5);
-    svg.circle(curve2.p2.x, curve2.p2.y, 4.0, "#e74c3c", "#fff", 1.5);
-    svg.circle(curve2.p3.x, curve2.p3.y, 5.0, "#2c3e50", "#fff", 1.5);
+    svg.circle(curve2.p0.x, curve2.p0.y, 5.0, "#ecf0f1", "#1a1a2e", 1.5);
+    svg.circle(curve2.p1.x, curve2.p1.y, 4.0, "#e74c3c", "#1a1a2e", 1.5);
+    svg.circle(curve2.p2.x, curve2.p2.y, 4.0, "#e74c3c", "#1a1a2e", 1.5);
+    svg.circle(curve2.p3.x, curve2.p3.y, 5.0, "#ecf0f1", "#1a1a2e", 1.5);
 
     svg.to_string(800.0, 300.0)
 }

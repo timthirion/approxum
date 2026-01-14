@@ -39,6 +39,7 @@ mod decompose;
 mod minkowski;
 mod offset;
 mod skeleton;
+mod stroke;
 mod triangulate;
 mod validate;
 mod visibility;
@@ -53,6 +54,10 @@ pub use decompose::{
 pub use minkowski::{minkowski_difference, minkowski_sum, minkowski_sum_convex, polygons_collide};
 pub use offset::{offset_polygon, offset_polygon_simple, JoinStyle};
 pub use skeleton::{medial_axis, straight_skeleton, Skeleton, SkeletonEdge, SkeletonNode};
+pub use stroke::{
+    stroke_closed_polyline, stroke_closed_polyline_with_options, stroke_polyline,
+    stroke_polyline_with_options, LineCap, LineJoin, StrokeOptions,
+};
 pub use triangulate::{
     triangulate_polygon, triangulate_polygon_indexed, triangulation_area, PolygonTriangle,
     TriangulationResult,

@@ -8,6 +8,7 @@ pub mod curves;
 pub mod distance;
 pub mod error;
 pub mod hull;
+pub mod io;
 pub mod polygon;
 pub mod primitives;
 pub mod sampling;
@@ -26,6 +27,10 @@ pub use bounds::{minimum_enclosing_circle, Aabb2, BoundingCapsule, BoundingCircl
 pub use error::ApproxError;
 pub use primitives::{Point2, Point3, Segment2, Segment3, Vec2, Vec3};
 pub use sampling::{poisson_disk, poisson_disk_with_seed, PoissonDiskSampler};
+pub use io::{
+    parse_svg_path, polygon_to_svg_path, polyline_to_svg_path, svg_path_to_polylines, SvgCommand,
+    SvgParseError, SvgPath,
+};
 pub use tolerance::{
     orient2d, point_on_segment, segments_intersect, Orientation, SegmentIntersection,
 };

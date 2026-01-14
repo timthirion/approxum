@@ -97,34 +97,6 @@ let polyline = curve.to_polyline(0.01);
 
 ## Gallery
 
-### Visibility Polygon
-
-Compute the visible region from a viewpoint within a polygon with obstacles.
-
-![Visibility polygon with light source](screenshots/visibility.svg)
-
-```rust
-use approxum::polygon::{visibility_polygon_with_obstacles, Polygon};
-
-let room = Polygon::new(room_vertices);
-let obstacles = vec![obstacle1, obstacle2];
-let visible = visibility_polygon_with_obstacles(&room, &obstacles, viewpoint);
-```
-
-### Boolean Operations
-
-Union, intersection, and difference of polygons.
-
-![Boolean operations on overlapping circles](screenshots/boolean.svg)
-
-```rust
-use approxum::polygon::{polygon_union, polygon_intersection, polygon_difference};
-
-let union = polygon_union(&poly_a, &poly_b);
-let intersection = polygon_intersection(&poly_a, &poly_b);
-let difference = polygon_difference(&poly_a, &poly_b);
-```
-
 ### Voronoi & Delaunay
 
 Delaunay triangulation (blue) with its dual Voronoi diagram (red).
@@ -140,9 +112,37 @@ let triangles = delaunay_triangulation(&points);
 let voronoi = voronoi_diagram(&points);
 ```
 
+### Boolean Operations
+
+Union, intersection, and difference of polygons using various shape combinations.
+
+![Boolean operations on different polygon pairs](screenshots/boolean.svg)
+
+```rust
+use approxum::polygon::{polygon_union, polygon_intersection, polygon_difference};
+
+let union = polygon_union(&poly_a, &poly_b);
+let intersection = polygon_intersection(&poly_a, &poly_b);
+let difference = polygon_difference(&poly_a, &poly_b);
+```
+
+### Visibility Polygon
+
+Compute the visible region from a viewpoint within a polygon with obstacles.
+
+![Visibility polygon with light source](screenshots/visibility.svg)
+
+```rust
+use approxum::polygon::{visibility_polygon_with_obstacles, Polygon};
+
+let room = Polygon::new(room_vertices);
+let obstacles = vec![obstacle1, obstacle2];
+let visible = visibility_polygon_with_obstacles(&room, &obstacles, viewpoint);
+```
+
 ### Polygon Offset
 
-Inward offset contours of a hexagon, showing progressive shrinking with miter joins.
+Inward offset contours of a hexagon and pentagon, showing progressive shrinking with miter joins.
 
 ![Polygon offset with inset contours](screenshots/skeleton.svg)
 
@@ -155,9 +155,9 @@ let inset = offset_polygon(&hexagon, -15.0, JoinStyle::Miter, 4.0);
 
 ### Curve Offset
 
-Parallel curves at varying distances from a cubic Bézier.
+Parallel curves at varying distances from cubic Béziers: an S-curve and a symmetric arc.
 
-![Offset curves around a Bézier](screenshots/curve_offset.svg)
+![Offset curves around two different Bézier curves](screenshots/curve_offset.svg)
 
 ```rust
 use approxum::curves::{offset_cubic_to_polyline, CubicBezier2};

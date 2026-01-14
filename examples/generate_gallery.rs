@@ -429,52 +429,53 @@ fn generate_logo() -> String {
 
 /// Visibility polygon example
 fn generate_visibility() -> String {
-    let mut svg = Svg::with_viewbox(0.0, 0.0, 400.0, 300.0);
-    svg.rect(0.0, 0.0, 400.0, 300.0, "#0f0f23");
+    let mut svg = Svg::with_viewbox(0.0, 0.0, 800.0, 300.0);
+    svg.rect(0.0, 0.0, 800.0, 300.0, "#0f0f23");
 
-    // Room with obstacles
+    // Room with obstacles (centered in 800 width)
+    let offset_x = 200.0;
     let room = vec![
-        Point2::new(20.0, 20.0),
-        Point2::new(380.0, 20.0),
-        Point2::new(380.0, 280.0),
-        Point2::new(20.0, 280.0),
+        Point2::new(offset_x + 20.0, 20.0),
+        Point2::new(offset_x + 380.0, 20.0),
+        Point2::new(offset_x + 380.0, 280.0),
+        Point2::new(offset_x + 20.0, 280.0),
     ];
 
     // Obstacles
     let obstacles = vec![
         // L-shaped obstacle
         vec![
-            Point2::new(80.0, 60.0),
-            Point2::new(150.0, 60.0),
-            Point2::new(150.0, 100.0),
-            Point2::new(110.0, 100.0),
-            Point2::new(110.0, 160.0),
-            Point2::new(80.0, 160.0),
+            Point2::new(offset_x + 80.0, 60.0),
+            Point2::new(offset_x + 150.0, 60.0),
+            Point2::new(offset_x + 150.0, 100.0),
+            Point2::new(offset_x + 110.0, 100.0),
+            Point2::new(offset_x + 110.0, 160.0),
+            Point2::new(offset_x + 80.0, 160.0),
         ],
         // Triangle
         vec![
-            Point2::new(200.0, 180.0),
-            Point2::new(280.0, 220.0),
-            Point2::new(200.0, 260.0),
+            Point2::new(offset_x + 200.0, 180.0),
+            Point2::new(offset_x + 280.0, 220.0),
+            Point2::new(offset_x + 200.0, 260.0),
         ],
         // Rectangle
         vec![
-            Point2::new(300.0, 80.0),
-            Point2::new(350.0, 80.0),
-            Point2::new(350.0, 150.0),
-            Point2::new(300.0, 150.0),
+            Point2::new(offset_x + 300.0, 80.0),
+            Point2::new(offset_x + 350.0, 80.0),
+            Point2::new(offset_x + 350.0, 150.0),
+            Point2::new(offset_x + 300.0, 150.0),
         ],
         // Small square
         vec![
-            Point2::new(160.0, 200.0),
-            Point2::new(190.0, 200.0),
-            Point2::new(190.0, 230.0),
-            Point2::new(160.0, 230.0),
+            Point2::new(offset_x + 160.0, 200.0),
+            Point2::new(offset_x + 190.0, 200.0),
+            Point2::new(offset_x + 190.0, 230.0),
+            Point2::new(offset_x + 160.0, 230.0),
         ],
     ];
 
     // Viewpoint
-    let viewpoint = Point2::new(200.0, 120.0);
+    let viewpoint = Point2::new(offset_x + 200.0, 120.0);
 
     // Calculate visibility polygon
     let room_poly = Polygon::new(room.clone());
@@ -509,97 +510,142 @@ fn generate_visibility() -> String {
     svg.circle(viewpoint.x, viewpoint.y, 8.0, "#ffd700", "#fff", 2.0);
     svg.circle(viewpoint.x, viewpoint.y, 4.0, "#fff", "none", 0.0);
 
-    svg.to_string(400.0, 300.0)
+    svg.to_string(800.0, 300.0)
 }
 
 /// Boolean operations example
 fn generate_boolean_ops() -> String {
-    let mut svg = Svg::with_viewbox(0.0, 0.0, 600.0, 250.0);
-    svg.rect(0.0, 0.0, 600.0, 250.0, "white");
+    let mut svg = Svg::with_viewbox(0.0, 0.0, 800.0, 250.0);
+    svg.rect(0.0, 0.0, 800.0, 250.0, "white");
 
-    // Create two overlapping shapes
-    let circle1: Vec<Point2<f64>> = (0..32)
-        .map(|i| {
-            let angle = 2.0 * PI * (i as f64) / 32.0;
-            Point2::new(70.0 + 50.0 * angle.cos(), 125.0 + 50.0 * angle.sin())
-        })
-        .collect();
+    // Helper to create a circle
+    let make_circle = |cx: f64, cy: f64, r: f64| -> Vec<Point2<f64>> {
+        (0..32)
+            .map(|i| {
+                let angle = 2.0 * PI * (i as f64) / 32.0;
+                Point2::new(cx + r * angle.cos(), cy + r * angle.sin())
+            })
+            .collect()
+    };
 
-    let circle2: Vec<Point2<f64>> = (0..32)
-        .map(|i| {
-            let angle = 2.0 * PI * (i as f64) / 32.0;
-            Point2::new(110.0 + 50.0 * angle.cos(), 125.0 + 50.0 * angle.sin())
-        })
-        .collect();
+    // Helper to create a square
+    let make_square = |cx: f64, cy: f64, size: f64| -> Vec<Point2<f64>> {
+        let h = size / 2.0;
+        vec![
+            Point2::new(cx - h, cy - h),
+            Point2::new(cx + h, cy - h),
+            Point2::new(cx + h, cy + h),
+            Point2::new(cx - h, cy + h),
+        ]
+    };
 
-    let poly1 = Polygon::new(circle1.clone());
-    let poly2 = Polygon::new(circle2.clone());
+    // Helper to create a triangle
+    let make_triangle = |cx: f64, cy: f64, r: f64| -> Vec<Point2<f64>> {
+        (0..3)
+            .map(|i| {
+                let angle = -PI / 2.0 + (i as f64) * 2.0 * PI / 3.0;
+                Point2::new(cx + r * angle.cos(), cy + r * angle.sin())
+            })
+            .collect()
+    };
 
-    // Union
-    let union_result = polygon_union(&poly1, &poly2);
-    let offset_x = 0.0;
+    // Helper to create a hexagon
+    let make_hexagon = |cx: f64, cy: f64, r: f64| -> Vec<Point2<f64>> {
+        (0..6)
+            .map(|i| {
+                let angle = (i as f64) * PI / 3.0;
+                Point2::new(cx + r * angle.cos(), cy + r * angle.sin())
+            })
+            .collect()
+    };
+
+    // Helper to create a star
+    let make_star = |cx: f64, cy: f64, outer: f64, inner: f64| -> Vec<Point2<f64>> {
+        (0..10)
+            .map(|i| {
+                let angle = -PI / 2.0 + (i as f64) * PI / 5.0;
+                let r = if i % 2 == 0 { outer } else { inner };
+                Point2::new(cx + r * angle.cos(), cy + r * angle.sin())
+            })
+            .collect()
+    };
+
+    // Helper to create a rounded rectangle (stadium/pill shape)
+    let make_pill = |cx: f64, cy: f64, w: f64, h: f64| -> Vec<Point2<f64>> {
+        let mut pts = Vec::new();
+        let r = h / 2.0;
+        // Right semicircle
+        for i in 0..=8 {
+            let angle = -PI / 2.0 + PI * (i as f64) / 8.0;
+            pts.push(Point2::new(
+                cx + w / 2.0 - r + r * angle.cos(),
+                cy + r * angle.sin(),
+            ));
+        }
+        // Left semicircle
+        for i in 0..=8 {
+            let angle = PI / 2.0 + PI * (i as f64) / 8.0;
+            pts.push(Point2::new(
+                cx - w / 2.0 + r + r * angle.cos(),
+                cy + r * angle.sin(),
+            ));
+        }
+        pts
+    };
+
+    let cy = 115.0;
+
+    // === Union: Circle + Square ===
+    let union_cx = 133.0;
+    let circle_u = make_circle(union_cx - 20.0, cy, 50.0);
+    let square_u = make_square(union_cx + 30.0, cy, 80.0);
+    let poly_circle = Polygon::new(circle_u.clone());
+    let poly_square = Polygon::new(square_u.clone());
+    let union_result = polygon_union(&poly_circle, &poly_square);
     for poly in &union_result {
-        let shifted: Vec<_> = poly
-            .vertices
-            .iter()
-            .map(|p| Point2::new(p.x + offset_x, p.y))
-            .collect();
-        svg.polygon(&shifted, "#3498db", "#2980b9", 2.0);
+        svg.polygon(&poly.vertices, "#3498db", "#2980b9", 2.0);
     }
-    svg.text(60.0, 230.0, "Union", 14.0, "#333");
+    svg.text(union_cx - 20.0, 230.0, "Union", 14.0, "#333");
 
-    // Intersection
-    let inter_result = polygon_intersection(&poly1, &poly2);
-    let offset_x = 170.0;
+    // === Intersection: Hexagon + Star ===
+    let inter_cx = 400.0;
+    let hex = make_hexagon(inter_cx, cy, 60.0);
+    let star = make_star(inter_cx, cy, 70.0, 35.0);
+    let poly_hex = Polygon::new(hex.clone());
+    let poly_star = Polygon::new(star.clone());
     // Draw original shapes faded
-    let c1: Vec<_> = circle1
-        .iter()
-        .map(|p| Point2::new(p.x + offset_x, p.y))
-        .collect();
-    let c2: Vec<_> = circle2
-        .iter()
-        .map(|p| Point2::new(p.x + offset_x, p.y))
-        .collect();
-    svg.polygon(&c1, "rgba(52,152,219,0.2)", "#bdc3c7", 1.0);
-    svg.polygon(&c2, "rgba(52,152,219,0.2)", "#bdc3c7", 1.0);
+    svg.polygon(&hex, "rgba(52,152,219,0.2)", "#bdc3c7", 1.0);
+    svg.polygon(&star, "rgba(52,152,219,0.2)", "#bdc3c7", 1.0);
+    let inter_result = polygon_intersection(&poly_hex, &poly_star);
     for poly in &inter_result {
-        let shifted: Vec<_> = poly
-            .vertices
-            .iter()
-            .map(|p| Point2::new(p.x + offset_x, p.y))
-            .collect();
-        svg.polygon(&shifted, "#e74c3c", "#c0392b", 2.0);
+        svg.polygon(&poly.vertices, "#e74c3c", "#c0392b", 2.0);
     }
-    svg.text(210.0, 230.0, "Intersection", 14.0, "#333");
+    svg.text(inter_cx - 45.0, 230.0, "Intersection", 14.0, "#333");
 
-    // Difference
-    let diff_result = polygon_difference(&poly1, &poly2);
-    let offset_x = 370.0;
-    let c2: Vec<_> = circle2
-        .iter()
-        .map(|p| Point2::new(p.x + offset_x, p.y))
-        .collect();
-    svg.polygon(&c2, "rgba(52,152,219,0.2)", "#bdc3c7", 1.0);
+    // === Difference: Pill - Triangle ===
+    let diff_cx = 667.0;
+    let pill = make_pill(diff_cx, cy, 140.0, 80.0);
+    let tri = make_triangle(diff_cx + 10.0, cy, 50.0);
+    let poly_pill = Polygon::new(pill.clone());
+    let poly_tri = Polygon::new(tri.clone());
+    // Draw subtracted shape faded
+    svg.polygon(&tri, "rgba(52,152,219,0.2)", "#bdc3c7", 1.0);
+    let diff_result = polygon_difference(&poly_pill, &poly_tri);
     for poly in &diff_result {
-        let shifted: Vec<_> = poly
-            .vertices
-            .iter()
-            .map(|p| Point2::new(p.x + offset_x, p.y))
-            .collect();
-        svg.polygon(&shifted, "#2ecc71", "#27ae60", 2.0);
+        svg.polygon(&poly.vertices, "#2ecc71", "#27ae60", 2.0);
     }
-    svg.text(410.0, 230.0, "Difference", 14.0, "#333");
+    svg.text(diff_cx - 40.0, 230.0, "Difference", 14.0, "#333");
 
-    svg.to_string(600.0, 250.0)
+    svg.to_string(800.0, 250.0)
 }
 
 /// Voronoi and Delaunay example
 fn generate_voronoi() -> String {
-    let mut svg = Svg::with_viewbox(0.0, 0.0, 400.0, 300.0);
-    svg.rect(0.0, 0.0, 400.0, 300.0, "#1a1a2e");
+    let mut svg = Svg::with_viewbox(0.0, 0.0, 800.0, 400.0);
+    svg.rect(0.0, 0.0, 800.0, 400.0, "#1a1a2e");
 
-    // Generate points using Poisson disk sampling
-    let points = poisson_disk(360.0, 260.0, 35.0, 30);
+    // Generate points using Poisson disk sampling (wider and taller area)
+    let points = poisson_disk(760.0, 360.0, 40.0, 30);
     let points: Vec<_> = points
         .into_iter()
         .map(|p| Point2::new(p.x + 20.0, p.y + 20.0))
@@ -643,90 +689,125 @@ fn generate_voronoi() -> String {
         svg.circle(p.x, p.y, 3.0, "#ecf0f1", "none", 0.0);
     }
 
-    svg.to_string(400.0, 300.0)
+    svg.to_string(800.0, 400.0)
 }
 
-/// Polygon offset example with L-shape
+/// Polygon offset example with two shapes side by side
 fn generate_skeleton() -> String {
-    let mut svg = Svg::with_viewbox(0.0, 0.0, 400.0, 300.0);
-    svg.rect(0.0, 0.0, 400.0, 300.0, "white");
+    let mut svg = Svg::with_viewbox(0.0, 0.0, 800.0, 300.0);
+    svg.rect(0.0, 0.0, 800.0, 300.0, "white");
 
-    // Create a convex hexagon centered in the viewport
-    // (Convex shapes work correctly with the offset algorithm)
-    let cx = 200.0;
+    let colors = ["#3498db", "#9b59b6", "#e74c3c", "#f39c12"];
+
+    // Left: Hexagon
+    let cx1 = 200.0;
     let cy = 150.0;
-    let radius = 100.0;
-    let shape: Vec<Point2<f64>> = (0..6)
+    let radius1 = 100.0;
+    let hexagon: Vec<Point2<f64>> = (0..6)
         .map(|i| {
-            let angle = -PI / 2.0 + (i as f64) * PI / 3.0; // Start from top
-            Point2::new(cx + radius * angle.cos(), cy + radius * angle.sin())
+            let angle = -PI / 2.0 + (i as f64) * PI / 3.0;
+            Point2::new(cx1 + radius1 * angle.cos(), cy + radius1 * angle.sin())
         })
         .collect();
 
-    let poly = Polygon::new(shape.clone());
-
-    // Draw offset contours at various distances (inward)
-    // Keep offsets small enough to avoid collapse/inversion at center
-    let colors = ["#3498db", "#9b59b6", "#e74c3c", "#f39c12"];
+    let poly1 = Polygon::new(hexagon.clone());
     for (i, &dist) in [-15.0, -30.0, -40.0, -48.0].iter().enumerate() {
-        let offset = offset_polygon(&poly, dist, JoinStyle::Miter, 4.0);
+        let offset = offset_polygon(&poly1, dist, JoinStyle::Miter, 4.0);
         if offset.vertices.len() >= 3 {
             svg.polygon(&offset.vertices, "none", colors[i], 2.0);
         }
     }
-
-    // Draw original polygon
-    svg.polygon(&shape, "none", "#2c3e50", 3.0);
-
-    // Draw vertices
-    for p in &shape {
+    svg.polygon(&hexagon, "none", "#2c3e50", 3.0);
+    for p in &hexagon {
         svg.circle(p.x, p.y, 4.0, "#2c3e50", "#fff", 1.5);
     }
 
-    svg.to_string(400.0, 300.0)
+    // Right: Pentagon
+    let cx2 = 600.0;
+    let radius2 = 100.0;
+    let pentagon: Vec<Point2<f64>> = (0..5)
+        .map(|i| {
+            let angle = -PI / 2.0 + (i as f64) * 2.0 * PI / 5.0;
+            Point2::new(cx2 + radius2 * angle.cos(), cy + radius2 * angle.sin())
+        })
+        .collect();
+
+    let poly2 = Polygon::new(pentagon.clone());
+    for (i, &dist) in [-15.0, -30.0, -45.0, -55.0].iter().enumerate() {
+        let offset = offset_polygon(&poly2, dist, JoinStyle::Miter, 4.0);
+        if offset.vertices.len() >= 3 {
+            svg.polygon(&offset.vertices, "none", colors[i], 2.0);
+        }
+    }
+    svg.polygon(&pentagon, "none", "#2c3e50", 3.0);
+    for p in &pentagon {
+        svg.circle(p.x, p.y, 4.0, "#2c3e50", "#fff", 1.5);
+    }
+
+    svg.to_string(800.0, 300.0)
 }
 
-/// Curve offset example
+/// Curve offset example with two curves side by side
 fn generate_curve_offset() -> String {
-    let mut svg = Svg::with_viewbox(0.0, 0.0, 400.0, 250.0);
-    svg.rect(0.0, 0.0, 400.0, 250.0, "#f8f9fa");
+    let mut svg = Svg::with_viewbox(0.0, 0.0, 800.0, 300.0);
+    svg.rect(0.0, 0.0, 800.0, 300.0, "#f8f9fa");
 
-    // Create an S-curve
-    let curve = CubicBezier2::new(
-        Point2::new(50.0, 200.0),
-        Point2::new(100.0, 50.0),
-        Point2::new(300.0, 200.0),
-        Point2::new(350.0, 50.0),
-    );
-
-    // Draw offset curves at various distances
     let offsets = [-40.0, -25.0, -12.0, 12.0, 25.0, 40.0];
     let colors = [
         "#9b59b6", "#3498db", "#1abc9c", "#1abc9c", "#3498db", "#9b59b6",
     ];
 
+    // Left: S-curve
+    let curve1 = CubicBezier2::new(
+        Point2::new(50.0, 250.0),
+        Point2::new(100.0, 50.0),
+        Point2::new(300.0, 250.0),
+        Point2::new(350.0, 50.0),
+    );
+
     for (&offset, &color) in offsets.iter().zip(colors.iter()) {
-        let offset_curve = offset_cubic_to_polyline(&curve, offset, 0.5);
+        let offset_curve = offset_cubic_to_polyline(&curve1, offset, 0.5);
         svg.polyline_path(&offset_curve, "none", color, 2.0);
     }
-
-    // Draw original curve (thicker)
-    let main_curve = curve.to_polyline(0.5);
-    svg.polyline_path(&main_curve, "none", "#2c3e50", 3.0);
-
-    // Draw control points and handles
+    let main_curve1 = curve1.to_polyline(0.5);
+    svg.polyline_path(&main_curve1, "none", "#2c3e50", 3.0);
     svg.line(
-        curve.p0.x, curve.p0.y, curve.p1.x, curve.p1.y, "#e74c3c", 1.0,
+        curve1.p0.x, curve1.p0.y, curve1.p1.x, curve1.p1.y, "#e74c3c", 1.0,
     );
     svg.line(
-        curve.p2.x, curve.p2.y, curve.p3.x, curve.p3.y, "#e74c3c", 1.0,
+        curve1.p2.x, curve1.p2.y, curve1.p3.x, curve1.p3.y, "#e74c3c", 1.0,
     );
-    svg.circle(curve.p0.x, curve.p0.y, 5.0, "#2c3e50", "#fff", 1.5);
-    svg.circle(curve.p1.x, curve.p1.y, 4.0, "#e74c3c", "#fff", 1.5);
-    svg.circle(curve.p2.x, curve.p2.y, 4.0, "#e74c3c", "#fff", 1.5);
-    svg.circle(curve.p3.x, curve.p3.y, 5.0, "#2c3e50", "#fff", 1.5);
+    svg.circle(curve1.p0.x, curve1.p0.y, 5.0, "#2c3e50", "#fff", 1.5);
+    svg.circle(curve1.p1.x, curve1.p1.y, 4.0, "#e74c3c", "#fff", 1.5);
+    svg.circle(curve1.p2.x, curve1.p2.y, 4.0, "#e74c3c", "#fff", 1.5);
+    svg.circle(curve1.p3.x, curve1.p3.y, 5.0, "#2c3e50", "#fff", 1.5);
 
-    svg.to_string(400.0, 250.0)
+    // Right: Simple arc (control points form a symmetric bow)
+    let curve2 = CubicBezier2::new(
+        Point2::new(450.0, 200.0),
+        Point2::new(550.0, 50.0),
+        Point2::new(650.0, 50.0),
+        Point2::new(750.0, 200.0),
+    );
+
+    for (&offset, &color) in offsets.iter().zip(colors.iter()) {
+        let offset_curve = offset_cubic_to_polyline(&curve2, offset, 0.5);
+        svg.polyline_path(&offset_curve, "none", color, 2.0);
+    }
+    let main_curve2 = curve2.to_polyline(0.5);
+    svg.polyline_path(&main_curve2, "none", "#2c3e50", 3.0);
+    svg.line(
+        curve2.p0.x, curve2.p0.y, curve2.p1.x, curve2.p1.y, "#e74c3c", 1.0,
+    );
+    svg.line(
+        curve2.p2.x, curve2.p2.y, curve2.p3.x, curve2.p3.y, "#e74c3c", 1.0,
+    );
+    svg.circle(curve2.p0.x, curve2.p0.y, 5.0, "#2c3e50", "#fff", 1.5);
+    svg.circle(curve2.p1.x, curve2.p1.y, 4.0, "#e74c3c", "#fff", 1.5);
+    svg.circle(curve2.p2.x, curve2.p2.y, 4.0, "#e74c3c", "#fff", 1.5);
+    svg.circle(curve2.p3.x, curve2.p3.y, 5.0, "#2c3e50", "#fff", 1.5);
+
+    svg.to_string(800.0, 300.0)
 }
 
 fn main() {

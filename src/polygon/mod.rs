@@ -40,6 +40,7 @@ mod minkowski;
 mod offset;
 mod skeleton;
 mod triangulate;
+mod validate;
 mod visibility;
 
 pub use boolean::{polygon_difference, polygon_intersection, polygon_union, polygon_xor};
@@ -55,6 +56,10 @@ pub use skeleton::{medial_axis, straight_skeleton, Skeleton, SkeletonEdge, Skele
 pub use triangulate::{
     triangulate_polygon, triangulate_polygon_indexed, triangulation_area, PolygonTriangle,
     TriangulationResult,
+};
+pub use validate::{
+    find_self_intersections, has_self_intersection, is_simple, is_valid, remove_duplicate_vertices,
+    repair_self_intersections, validate, SelfIntersection, ValidationResult,
 };
 pub use visibility::{
     is_visible, is_visible_with_obstacles, visibility_polygon, visibility_polygon_with_obstacles,

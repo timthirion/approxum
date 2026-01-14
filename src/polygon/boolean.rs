@@ -373,18 +373,8 @@ fn build_intersection_polygon<F: Float>(
 
 /// Union of two convex polygons.
 fn convex_union<F: Float>(a: &Polygon<F>, b: &Polygon<F>) -> Vec<Polygon<F>> {
-    // Compute convex hull of both polygons' vertices
-    let mut all_vertices = a.vertices.clone();
-    all_vertices.extend(b.vertices.clone());
-
-    // Use our hull module
-    let hull = crate::hull::convex_hull(&all_vertices);
-
-    if hull.len() < 3 {
-        return Vec::new();
-    }
-
-    vec![Polygon::new(hull)]
+    // Use general union which properly traces the boundary
+    general_union(a, b)
 }
 
 /// General union for possibly concave polygons.
@@ -411,68 +401,189 @@ fn general_union<F: Float>(a: &Polygon<F>, b: &Polygon<F>) -> Vec<Polygon<F>> {
     build_union_polygon(a, b, &intersections)
 }
 
-/// Build union polygon.
+/// Build union polygon by tracing the outer boundary.
 fn build_union_polygon<F: Float>(
     a: &Polygon<F>,
     b: &Polygon<F>,
     intersections: &[IntersectionPoint<F>],
 ) -> Vec<Polygon<F>> {
-    // Collect all vertices that are outside the other polygon
+    if intersections.is_empty() {
+        return Vec::new();
+    }
+
+    let n_a = a.vertices.len();
+    let n_b = b.vertices.len();
+
+    // Build sorted intersection lists for each edge
+    let mut intersections_on_a: Vec<Vec<(F, Point2<F>, usize)>> = vec![Vec::new(); n_a];
+    let mut intersections_on_b: Vec<Vec<(F, Point2<F>, usize)>> = vec![Vec::new(); n_b];
+
+    for (idx, inter) in intersections.iter().enumerate() {
+        intersections_on_a[inter.edge_a].push((inter.t_a, inter.point, idx));
+        intersections_on_b[inter.edge_b].push((inter.t_b, inter.point, idx));
+    }
+
+    // Sort intersections along each edge by parameter t
+    for list in &mut intersections_on_a {
+        list.sort_by(|x, y| x.0.partial_cmp(&y.0).unwrap_or(std::cmp::Ordering::Equal));
+    }
+    for list in &mut intersections_on_b {
+        list.sort_by(|x, y| x.0.partial_cmp(&y.0).unwrap_or(std::cmp::Ordering::Equal));
+    }
+
+    // Trace the union boundary starting from first intersection
     let mut result_vertices: Vec<Point2<F>> = Vec::new();
+    let mut visited_intersections = vec![false; intersections.len()];
 
-    // Add intersection points
-    for inter in intersections {
-        result_vertices.push(inter.point);
+    // Find starting intersection and determine which polygon to start tracing
+    let start_inter_idx = 0;
+    let start_inter = &intersections[start_inter_idx];
+    visited_intersections[start_inter_idx] = true;
+    result_vertices.push(start_inter.point);
+
+    // Determine starting direction: trace polygon A if next vertex of A is outside B
+    let next_a_vertex = a.vertices[(start_inter.edge_a + 1) % n_a];
+    let mut tracing_a = !b.contains(next_a_vertex);
+
+    let mut current_edge;
+    // Track current position along edge (t parameter, 0 to 1)
+    let mut current_t: F;
+
+    if tracing_a {
+        current_edge = start_inter.edge_a;
+        current_t = start_inter.t_a;
+    } else {
+        current_edge = start_inter.edge_b;
+        current_t = start_inter.t_b;
     }
 
-    // Add vertices of A that are outside B
-    for &v in &a.vertices {
-        if !b.contains(v) {
-            result_vertices.push(v);
+    let max_iterations = (n_a + n_b) * 2 + intersections.len() * 2;
+    let mut iterations = 0;
+
+    loop {
+        iterations += 1;
+        if iterations > max_iterations {
+            break; // Safety limit
+        }
+
+        if tracing_a {
+            // Move to next vertex/intersection on polygon A
+            let edge_inters = &intersections_on_a[current_edge];
+
+            // Find next intersection on this edge after current position
+            let next_inter = edge_inters
+                .iter()
+                .find(|(t, _, idx)| *t > current_t + F::epsilon() && !visited_intersections[*idx]);
+
+            if let Some((_t, point, idx)) = next_inter {
+                // Found another intersection on this edge
+                visited_intersections[*idx] = true;
+                result_vertices.push(*point);
+                // Switch to polygon B
+                tracing_a = false;
+                current_edge = intersections[*idx].edge_b;
+                current_t = intersections[*idx].t_b;
+            } else {
+                // No more intersections on this edge, add end vertex and move to next edge
+                let next_vertex_idx = (current_edge + 1) % n_a;
+                let next_vertex = a.vertices[next_vertex_idx];
+
+                if !b.contains(next_vertex) {
+                    result_vertices.push(next_vertex);
+                }
+
+                current_edge = next_vertex_idx;
+                current_t = F::zero(); // Start of new edge
+
+                // Check if there's an intersection on the new edge
+                if let Some((_t, point, idx)) = intersections_on_a[current_edge]
+                    .iter()
+                    .find(|(_, _, idx)| !visited_intersections[*idx])
+                {
+                    visited_intersections[*idx] = true;
+                    result_vertices.push(*point);
+                    // Switch to polygon B
+                    tracing_a = false;
+                    current_edge = intersections[*idx].edge_b;
+                    current_t = intersections[*idx].t_b;
+                }
+            }
+        } else {
+            // Move to next vertex/intersection on polygon B
+            let edge_inters = &intersections_on_b[current_edge];
+
+            // Find next intersection on this edge after current position
+            let next_inter = edge_inters
+                .iter()
+                .find(|(t, _, idx)| *t > current_t + F::epsilon() && !visited_intersections[*idx]);
+
+            if let Some((_t, point, idx)) = next_inter {
+                // Found another intersection on this edge
+                visited_intersections[*idx] = true;
+                result_vertices.push(*point);
+                // Switch to polygon A
+                tracing_a = true;
+                current_edge = intersections[*idx].edge_a;
+                current_t = intersections[*idx].t_a;
+            } else {
+                // No more intersections on this edge, add end vertex and move to next edge
+                let next_vertex_idx = (current_edge + 1) % n_b;
+                let next_vertex = b.vertices[next_vertex_idx];
+
+                if !a.contains(next_vertex) {
+                    result_vertices.push(next_vertex);
+                }
+
+                current_edge = next_vertex_idx;
+                current_t = F::zero(); // Start of new edge
+
+                // Check if there's an intersection on the new edge
+                if let Some((_t, point, idx)) = intersections_on_b[current_edge]
+                    .iter()
+                    .find(|(_, _, idx)| !visited_intersections[*idx])
+                {
+                    visited_intersections[*idx] = true;
+                    result_vertices.push(*point);
+                    // Switch to polygon A
+                    tracing_a = true;
+                    current_edge = intersections[*idx].edge_a;
+                    current_t = intersections[*idx].t_a;
+                }
+            }
+        }
+
+        // Check if we've returned to the starting intersection
+        // We know we're done when we're on an edge containing the start intersection
+        // and we would hit it if it weren't already visited
+        let start_inter = &intersections[start_inter_idx];
+        let (on_start_edge, start_t_on_current) = if tracing_a {
+            (current_edge == start_inter.edge_a, start_inter.t_a)
+        } else {
+            (current_edge == start_inter.edge_b, start_inter.t_b)
+        };
+
+        if on_start_edge
+            && current_t < start_t_on_current
+            && visited_intersections.iter().all(|&v| v)
+        {
+            // We're approaching the start intersection from behind - we've completed the loop
+            break;
         }
     }
 
-    // Add vertices of B that are outside A
-    for &v in &b.vertices {
-        if !a.contains(v) {
-            result_vertices.push(v);
+    // Remove near-duplicate consecutive points
+    if result_vertices.len() >= 2 {
+        let mut deduped = vec![result_vertices[0]];
+        for v in result_vertices.iter().skip(1) {
+            let last = deduped.last().unwrap();
+            let dx = v.x - last.x;
+            let dy = v.y - last.y;
+            if (dx * dx + dy * dy).sqrt() > F::from(1e-9).unwrap() {
+                deduped.push(*v);
+            }
         }
+        result_vertices = deduped;
     }
-
-    if result_vertices.len() < 3 {
-        // If not enough outer points, use convex hull
-        let mut all_vertices = a.vertices.clone();
-        all_vertices.extend(b.vertices.clone());
-        let hull = crate::hull::convex_hull(&all_vertices);
-        return vec![Polygon::new(hull)];
-    }
-
-    // Order vertices by angle around centroid
-    let cx: F = result_vertices
-        .iter()
-        .map(|p| p.x)
-        .fold(F::zero(), |a, b| a + b)
-        / F::from(result_vertices.len()).unwrap();
-    let cy: F = result_vertices
-        .iter()
-        .map(|p| p.y)
-        .fold(F::zero(), |a, b| a + b)
-        / F::from(result_vertices.len()).unwrap();
-
-    result_vertices.sort_by(|p1, p2| {
-        let angle1 = (p1.y - cy).atan2(p1.x - cx);
-        let angle2 = (p2.y - cy).atan2(p2.x - cx);
-        angle1
-            .partial_cmp(&angle2)
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
-
-    // Remove duplicates
-    result_vertices.dedup_by(|a, b| {
-        let dx = a.x - b.x;
-        let dy = a.y - b.y;
-        (dx * dx + dy * dy).sqrt() < F::from(1e-10).unwrap()
-    });
 
     if result_vertices.len() < 3 {
         return Vec::new();
@@ -661,10 +772,9 @@ mod tests {
 
         let result = polygon_union(&square1, &square2);
         assert!(!result.is_empty());
-        // Union area = 4 + 4 - 1 = 7 (approximate for general case)
+        // Union area = 4 + 4 - 1 = 7
         let total_area: f64 = result.iter().map(|p| p.area()).sum();
-        // General polygon union is approximate - allow wider tolerance
-        assert!(total_area >= 6.0 && total_area <= 8.0);
+        assert!((total_area - 7.0).abs() < 0.1);
     }
 
     #[test]

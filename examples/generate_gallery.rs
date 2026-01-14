@@ -518,25 +518,14 @@ fn generate_boolean_ops() -> String {
     let mut svg = Svg::with_viewbox(0.0, 0.0, 800.0, 250.0);
     svg.rect(0.0, 0.0, 800.0, 250.0, "white");
 
-    // Helper to create a circle
+    // Helper to create a circle (64 vertices for smooth curves)
     let make_circle = |cx: f64, cy: f64, r: f64| -> Vec<Point2<f64>> {
-        (0..32)
+        (0..64)
             .map(|i| {
-                let angle = 2.0 * PI * (i as f64) / 32.0;
+                let angle = 2.0 * PI * (i as f64) / 64.0;
                 Point2::new(cx + r * angle.cos(), cy + r * angle.sin())
             })
             .collect()
-    };
-
-    // Helper to create a square
-    let make_square = |cx: f64, cy: f64, size: f64| -> Vec<Point2<f64>> {
-        let h = size / 2.0;
-        vec![
-            Point2::new(cx - h, cy - h),
-            Point2::new(cx + h, cy - h),
-            Point2::new(cx + h, cy + h),
-            Point2::new(cx - h, cy + h),
-        ]
     };
 
     // Helper to create a triangle
@@ -595,16 +584,20 @@ fn generate_boolean_ops() -> String {
 
     let cy = 115.0;
 
-    // === Union: Circle + Square ===
+    // === Union: Two overlapping circles ===
     let union_cx = 133.0;
-    let circle_u = make_circle(union_cx - 20.0, cy, 50.0);
-    let square_u = make_square(union_cx + 30.0, cy, 80.0);
-    let poly_circle = Polygon::new(circle_u.clone());
-    let poly_square = Polygon::new(square_u.clone());
-    let union_result = polygon_union(&poly_circle, &poly_square);
+    let circle_a = make_circle(union_cx - 25.0, cy, 50.0);
+    let circle_b = make_circle(union_cx + 25.0, cy, 50.0);
+    let poly_a = Polygon::new(circle_a.clone());
+    let poly_b = Polygon::new(circle_b.clone());
+    // Draw union result with fill
+    let union_result = polygon_union(&poly_a, &poly_b);
     for poly in &union_result {
-        svg.polygon(&poly.vertices, "#3498db", "#2980b9", 2.0);
+        svg.polygon(&poly.vertices, "#2ecc71", "#27ae60", 2.0);
     }
+    // Show original shape outlines on top
+    svg.polygon(&circle_a, "none", "#e74c3c", 1.5);
+    svg.polygon(&circle_b, "none", "#3498db", 1.5);
     svg.text(union_cx - 20.0, 230.0, "Union", 14.0, "#333");
 
     // === Intersection: Hexagon + Star ===
@@ -613,12 +606,13 @@ fn generate_boolean_ops() -> String {
     let star = make_star(inter_cx, cy, 70.0, 35.0);
     let poly_hex = Polygon::new(hex.clone());
     let poly_star = Polygon::new(star.clone());
-    // Draw original shapes faded
-    svg.polygon(&hex, "rgba(52,152,219,0.2)", "#bdc3c7", 1.0);
-    svg.polygon(&star, "rgba(52,152,219,0.2)", "#bdc3c7", 1.0);
+    // Show original shapes with distinct colors
+    svg.polygon(&hex, "rgba(155,89,182,0.25)", "#9b59b6", 1.5);
+    svg.polygon(&star, "rgba(241,196,15,0.25)", "#f1c40f", 1.5);
+    // Draw intersection result
     let inter_result = polygon_intersection(&poly_hex, &poly_star);
     for poly in &inter_result {
-        svg.polygon(&poly.vertices, "#e74c3c", "#c0392b", 2.0);
+        svg.polygon(&poly.vertices, "#27ae60", "#1e8449", 2.5);
     }
     svg.text(inter_cx - 45.0, 230.0, "Intersection", 14.0, "#333");
 
@@ -628,12 +622,15 @@ fn generate_boolean_ops() -> String {
     let tri = make_triangle(diff_cx + 10.0, cy, 50.0);
     let poly_pill = Polygon::new(pill.clone());
     let poly_tri = Polygon::new(tri.clone());
-    // Draw subtracted shape faded
-    svg.polygon(&tri, "rgba(52,152,219,0.2)", "#bdc3c7", 1.0);
+    // Show original pill outline faded
+    svg.polygon(&pill, "none", "rgba(52,152,219,0.4)", 1.5);
+    // Draw difference result with fill (hole will show as background)
     let diff_result = polygon_difference(&poly_pill, &poly_tri);
     for poly in &diff_result {
-        svg.polygon(&poly.vertices, "#2ecc71", "#27ae60", 2.0);
+        svg.polygon(&poly.vertices, "#3498db", "#2980b9", 2.0);
     }
+    // Draw triangle outline on top to show what was subtracted
+    svg.polygon(&tri, "white", "#e74c3c", 2.0);
     svg.text(diff_cx - 40.0, 230.0, "Difference", 14.0, "#333");
 
     svg.to_string(800.0, 250.0)
@@ -772,10 +769,20 @@ fn generate_curve_offset() -> String {
     let main_curve1 = curve1.to_polyline(0.5);
     svg.polyline_path(&main_curve1, "none", "#2c3e50", 3.0);
     svg.line(
-        curve1.p0.x, curve1.p0.y, curve1.p1.x, curve1.p1.y, "#e74c3c", 1.0,
+        curve1.p0.x,
+        curve1.p0.y,
+        curve1.p1.x,
+        curve1.p1.y,
+        "#e74c3c",
+        1.0,
     );
     svg.line(
-        curve1.p2.x, curve1.p2.y, curve1.p3.x, curve1.p3.y, "#e74c3c", 1.0,
+        curve1.p2.x,
+        curve1.p2.y,
+        curve1.p3.x,
+        curve1.p3.y,
+        "#e74c3c",
+        1.0,
     );
     svg.circle(curve1.p0.x, curve1.p0.y, 5.0, "#2c3e50", "#fff", 1.5);
     svg.circle(curve1.p1.x, curve1.p1.y, 4.0, "#e74c3c", "#fff", 1.5);
@@ -797,10 +804,20 @@ fn generate_curve_offset() -> String {
     let main_curve2 = curve2.to_polyline(0.5);
     svg.polyline_path(&main_curve2, "none", "#2c3e50", 3.0);
     svg.line(
-        curve2.p0.x, curve2.p0.y, curve2.p1.x, curve2.p1.y, "#e74c3c", 1.0,
+        curve2.p0.x,
+        curve2.p0.y,
+        curve2.p1.x,
+        curve2.p1.y,
+        "#e74c3c",
+        1.0,
     );
     svg.line(
-        curve2.p2.x, curve2.p2.y, curve2.p3.x, curve2.p3.y, "#e74c3c", 1.0,
+        curve2.p2.x,
+        curve2.p2.y,
+        curve2.p3.x,
+        curve2.p3.y,
+        "#e74c3c",
+        1.0,
     );
     svg.circle(curve2.p0.x, curve2.p0.y, 5.0, "#2c3e50", "#fff", 1.5);
     svg.circle(curve2.p1.x, curve2.p1.y, 4.0, "#e74c3c", "#fff", 1.5);

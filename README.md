@@ -114,7 +114,7 @@ let voronoi = voronoi_diagram(&points);
 
 ### Boolean Operations
 
-Union, intersection, and difference of polygons using various shape combinations.
+Union, intersection, and difference of polygons: overlapping circles, hexagon with star, and pill minus triangle.
 
 ![Boolean operations on different polygon pairs](screenshots/boolean.svg)
 

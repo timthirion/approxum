@@ -6,15 +6,30 @@ A Rust library for geometric approximation algorithms.
 
 Not everything needs to be exact. **approxum** provides algorithms for when you need practical results — trading precision for speed, simplicity, or tractability.
 
-Companion to [exactum](https://github.com/...) (exact integer geometry). Use exactum when correctness is critical; use approxum for preprocessing, optimization, and "good enough" computation.
+---
+
+## Project Status
+
+- **CI**: GitHub Actions (test, clippy, fmt)
+- **Features**: `simd` (SIMD acceleration), `serde` (serialization)
+- **MSRV**: Rust 1.70+
 
 ---
 
 ## Modules
 
+### primitives/
+
+Core geometric types generic over `f32`/`f64`.
+
+- `Point2<F>`, `Point3<F>` — Points
+- `Vec2<F>`, `Vec3<F>` — Vectors
+- `Segment2<F>`, `Segment3<F>` — Line segments
+- `Ellipse2<F>` — Ellipse with local coordinate transforms
+
 ### simplify/
 
-Polyline and polygon simplification.
+Polyline simplification algorithms.
 
 | Algorithm | Description | Complexity |
 |-----------|-------------|------------|
@@ -23,23 +38,34 @@ Polyline and polygon simplification.
 | `radial` | Radial distance filtering | O(n) |
 | `topology` | Topology-preserving simplification | O(n²) |
 
-**Use cases:** LOD generation, GIS data reduction, GPS track compression
-
 ### curves/
 
-Curve discretization and fitting.
+Curve discretization, fitting, and operations.
 
-**Discretization (curve → polyline):**
-- `bezier_to_polyline` — Adaptive subdivision
-- `arc_to_polyline` — Circular arc approximation
-- `ellipse_to_polygon` — Ellipse discretization
+- `CubicBezier2`, `QuadraticBezier2` — Bézier curves with adaptive discretization
+- `Arc2` — Circular arcs
+- `fit_cubic` — Least-squares Bézier fitting
+- `offset_cubic_to_polyline` — Parallel curve generation
+- `intersect_cubic_cubic` — Curve intersection detection
 
-**Fitting (points → curve):**
-- `fit_bezier` — Least-squares Bézier fitting
-- `fit_arc` — Circular arc fitting
-- `fit_line` — Linear regression
+### polygon/
 
-**Use cases:** CNC toolpaths, font rendering, CAD import/export
+Polygon operations including boolean operations.
+
+**Boolean Operations** (fixed boundary-tracing algorithm):
+- `polygon_union` — Union of two polygons
+- `polygon_intersection` — Intersection of two polygons
+- `polygon_difference` — Difference (A - B)
+- `polygon_xor` — Symmetric difference
+
+**Other Operations**:
+- `offset_polygon` — Polygon inflation/deflation with miter/bevel/round joins
+- `stroke_polyline` — Convert paths to outline polygons
+- `straight_skeleton` — Straight skeleton computation
+- `minkowski_sum`, `minkowski_difference` — Shape dilation/erosion
+- `visibility_polygon` — Compute visible area from a point
+- `triangulate_polygon` — Ear clipping triangulation
+- `convex_decomposition` — Split concave polygons into convex pieces
 
 ### bounds/
 
@@ -47,81 +73,76 @@ Bounding volume computation.
 
 | Type | Description |
 |------|-------------|
-| `Aabb` | Axis-aligned bounding box |
-| `Obb` | Oriented bounding box (tighter fit) |
-| `BoundingCircle` | Minimum enclosing circle |
-| `BoundingCapsule` | Capsule (cylinder + hemispheres) |
-| `ConvexHull` | Convex hull as bounding volume |
+| `Aabb2` | Axis-aligned bounding box |
+| `Obb2` | Oriented bounding box (tighter fit) |
+| `BoundingCircle` | Minimum enclosing circle (Welzl's algorithm) |
+| `BoundingCapsule` | Capsule fitting |
 
-**Hierarchies:**
-- `Bvh` — Bounding volume hierarchy (SAH construction)
-- `LooseQuadtree` — Spatial index for dynamic objects
+### spatial/
 
-**Use cases:** Collision broad-phase, frustum culling, spatial queries
+Spatial data structures.
+
+- `Bvh` — Bounding volume hierarchy with SAH construction
+- `KdTree` — K-d tree for nearest neighbor queries
+
+### triangulation/
+
+Triangulation and diagram algorithms.
+
+- `delaunay_triangulation` — Delaunay triangulation
+- `voronoi_diagram` — Voronoi diagram construction
+
+### sampling/
+
+Point generation.
+
+- `poisson_disk` — Blue noise sampling (Bridson's algorithm)
+- `sobol_sequence` — Low-discrepancy Sobol sequences
+
+### distance/
+
+Distance fields and signed distance functions.
+
+- `sdf_circle`, `sdf_polygon` — Signed distance functions
+- `distance_transform` — Euclidean distance transform (O(n))
+- `SdfGrid` — Grid-based SDF with bilinear sampling
 
 ### tolerance/
 
 Epsilon-aware geometric operations.
 
-**Predicates with tolerance:**
-- `point_on_line(p, line, eps)` — Is point within epsilon of line?
-- `segments_intersect(s1, s2, eps)` — Intersection with tolerance
-- `polygons_equal(p1, p2, eps)` — Approximate equality
+**Predicates**:
+- `orient2d`, `point_on_segment`, `segments_intersect` — With explicit epsilon
 
-**Cleanup operations:**
-- `weld_vertices(points, eps)` — Merge nearby points
-- `snap_to_grid(points, grid_size)` — Quantize to grid
-- `remove_degenerate_edges(poly, eps)` — Remove zero-length edges
+**Cleanup**:
+- `weld_vertices` — Merge nearby points
+- `snap_to_grid` — Quantize to grid
+- `remove_degenerate_edges` — Remove zero-length edges
 
-**Distance metrics:**
-- `hausdorff_distance(a, b)` — Maximum deviation between shapes
-- `frechet_distance_approx(a, b)` — Approximate Fréchet distance
+**Metrics**:
+- `hausdorff_distance` — Maximum deviation between shapes
+- `frechet_distance` — Curve similarity (discrete approximation)
 
-**Use cases:** CAD import cleanup, GIS data fusion, 3D scan processing
+### hull/
 
-### distance/
+Convex hull computation.
 
-Distance computations and fields.
+- `convex_hull` — Graham scan algorithm
 
-- `sdf_2d` — 2D signed distance field generation
-- `sdf_3d` — 3D signed distance field
-- `distance_transform` — Grid-based distance transform
-- `approximate_nn` — Approximate nearest neighbor queries
+### io/
 
-**Use cases:** Collision detection, implicit surfaces, pathfinding
+Input/output utilities.
 
-### sampling/
+- `parse_svg_path` — Parse SVG path commands
+- `svg_path_to_polylines` — Convert SVG paths to polylines
+- `polyline_to_svg_path` — Export polylines to SVG
 
-Point generation and interpolation.
+### simd/ (feature = "simd")
 
-**Sampling:**
-- `poisson_disk` — Blue noise sampling
-- `stratified` — Stratified random sampling
-- `halton` — Halton low-discrepancy sequence
-- `sobol` — Sobol sequence
+SIMD-accelerated operations using the `wide` crate.
 
-**Interpolation:**
-- `barycentric` — Barycentric interpolation in triangles
-- `idw` — Inverse distance weighting
-- `natural_neighbor` — Natural neighbor interpolation
-
-**Use cases:** Texture synthesis, remeshing, point cloud resampling
-
-### float_geo/
-
-Floating-point geometric primitives and operations.
-
-**Types:**
-- `Point2<F>`, `Point3<F>` — Generic over `f32`/`f64`
-- `Vec2<F>`, `Vec3<F>` — Vectors
-- `Segment2<F>`, `Segment3<F>` — Line segments
-- `Polygon2<F>` — 2D polygon
-
-**Operations:**
-- `orient2d(a, b, c)` — Orientation with configurable epsilon
-- `line_intersection(l1, l2)` — Returns `Option` for near-parallel
-- `polygon_area(poly)` — Signed area
-- `centroid(poly)` — Geometric center
+- Batch point distance calculations
+- Vectorized curve evaluation
 
 ---
 
@@ -132,42 +153,6 @@ Floating-point geometric primitives and operations.
 3. **Generic over float type** — Support both `f32` and `f64`
 4. **No allocations in hot paths** — Preallocate where possible
 5. **SIMD-friendly** — Data layouts amenable to vectorization
-
----
-
-## Error Handling
-
-```rust
-pub enum ApproxError {
-    /// Points are too close together for reliable computation
-    DegenerateInput,
-    /// Lines are nearly parallel
-    NearParallel,
-    /// Tolerance is too small for the input scale
-    ToleranceTooSmall,
-    /// Algorithm did not converge
-    ConvergenceFailed { iterations: usize },
-}
-```
-
----
-
-## Bridge to exactum
-
-```rust
-use exactum::Point2 as ExactPoint;
-use approxum::Point2 as FloatPoint;
-
-// Exact → Approximate
-impl<T: IntCoord> From<ExactPoint<T>> for FloatPoint<f64> {
-    fn from(p: ExactPoint<T>) -> Self {
-        FloatPoint::new(p.x.to_f64(), p.y.to_f64())
-    }
-}
-
-// Approximate → Exact (lossy, requires snapping)
-let snapped: Vec<ExactPoint<i64>> = approxum::snap_to_grid(&float_points, grid_size);
-```
 
 ---
 
@@ -182,59 +167,50 @@ thiserror = "1.0"
 default = []
 simd = ["wide"]          # SIMD acceleration
 serde = ["dep:serde"]    # Serialization
-exactum = ["dep:exactum"] # Bridge to exactum
 ```
 
 ---
 
-## Development Phases
+## Recent Changes
 
-**Phase 1: Core**
-- [ ] `Point2`, `Vec2`, `Segment2` for `f32`/`f64`
-- [ ] Basic predicates with epsilon
-- [ ] AABB, minimum enclosing circle
+### Polygon Boolean Operations Fix
 
-**Phase 2: Simplification**
-- [ ] Ramer-Douglas-Peucker
-- [ ] Visvalingam-Whyatt
-- [ ] Topology-preserving variant
+The `polygon_union` function was fixed to use proper boundary-tracing instead of convex hull or angle-sorting approaches. The algorithm now:
 
-**Phase 3: Curves**
-- [ ] Bézier discretization (adaptive)
-- [ ] Arc discretization
-- [ ] Bézier fitting
+1. Finds all intersection points between polygon edges
+2. Sorts intersections along each edge by parameter t
+3. Traces the outer boundary by following edges and switching polygons at intersections
+4. Correctly handles the loop termination when returning to the start
 
-**Phase 4: Spatial**
-- [ ] BVH construction
-- [ ] Signed distance fields
-- [ ] Poisson disk sampling
+This produces correct results for overlapping convex polygons (e.g., the "peanut" shape from two overlapping circles).
 
-**Phase 5: Polish**
-- [ ] SIMD optimization
-- [ ] Benchmarks
-- [ ] exactum bridge
+### Gallery Images
+
+All gallery images in `screenshots/` now use consistent dark backgrounds (`#1a1a2e`) for better visibility on both light and dark themes.
 
 ---
 
 ## Example Usage
 
 ```rust
-use approxum::{Point2, simplify, bounds};
+use approxum::{Point2, simplify, sampling, curves::CubicBezier2};
 
-fn main() {
-    // Simplify a noisy GPS track
-    let track: Vec<Point2<f64>> = load_gpx("track.gpx");
-    let simplified = simplify::rdp(&track, 0.0001); // ~10m tolerance in degrees
-    println!("Reduced {} points to {}", track.len(), simplified.len());
+// Simplify a noisy GPS track
+let track: Vec<Point2<f64>> = load_track();
+let simplified = simplify::rdp(&track, 0.001);
+println!("Reduced {} points to {}", track.len(), simplified.len());
 
-    // Compute bounding circle for collision detection
-    let circle = bounds::minimum_enclosing_circle(&simplified);
-    println!("Bounding circle: center={:?}, radius={}", circle.center, circle.radius);
+// Generate blue noise points
+let points = sampling::poisson_disk(100.0, 100.0, 2.5, 30);
 
-    // Snap to integer grid for exactum
-    let grid_size = 1000; // 1000 units per degree
-    let snapped: Vec<exactum::Point2<i64>> = approxum::snap_to_grid(&simplified, grid_size);
-}
+// Discretize a Bézier curve
+let curve = CubicBezier2::new(
+    Point2::new(0.0, 0.0),
+    Point2::new(1.0, 2.0),
+    Point2::new(3.0, 2.0),
+    Point2::new(4.0, 0.0),
+);
+let polyline = curve.to_polyline(0.01);
 ```
 
 ---
